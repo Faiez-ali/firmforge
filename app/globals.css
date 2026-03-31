@@ -60,6 +60,11 @@
     font-family: var(--font-mono), ui-monospace, monospace;
   }
 
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
   /* Subtle grid background for hero */
   .bg-grid {
     background-image:

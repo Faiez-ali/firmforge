@@ -171,20 +171,34 @@ GITHUB_API_TOKEN
 
 ## Known issues to fix (as of session 4)
 
-1. `next.config.ts` → must be renamed `next.config.mjs` (Next.js 14 limitation)
-2. `app/layout.tsx` → uses `Geist` font (Next.js 15 only) → replace with `Inter` + `JetBrains_Mono`
-3. Run `npm audit fix` to address 17 vulnerabilities from npm install
+1. ~~`next.config.ts` → must be renamed `next.config.mjs`~~ ✓ DONE
+2. ~~`app/layout.tsx` → uses `Geist` font~~ ✓ DONE — now Inter + JetBrains_Mono
+3. ~~`npm audit fix` — 17 vulnerabilities~~ ✓ DONE — Next.js upgraded to 14.2.35
+4. ~~`autoprefixer` missing from devDependencies~~ ✓ DONE
+
+---
+
+## UI / Design direction (as of session 5)
+
+- **Modern interactive UI** — the original scaffold was too plain/static
+- Use Framer Motion (already installed) for all page-level animations
+- Design language: dark SaaS, aurora/mesh gradient backgrounds, glassmorphism cards,
+  bento grid layouts, glowing CTAs, micro-interactions on hover
+- Reference aesthetic: Linear.app × Vercel × Framer — clean dark with bold accents
+- The firmware generation flow should feel "adventurous" — like a mission control
+- `framer-motion` is already in dependencies — use it freely
 
 ---
 
 ## Current task queue (in priority order)
 
-1. Fix next.config.mjs and layout.tsx issues — get `npm run dev` running clean
-2. Commit and push `feat/supabase-auth` branch (files already exist locally)
-3. Build `feat/paddle-billing` — Paddle checkout, webhook, plan enforcement
-4. Build `feat/generation-limits` — enforce free tier 3/month limit
-5. Build `feat/projects-history` — full project list with re-download
-6. Build `feat/landing-polish` — showcase gallery, SEO, testimonials
+1. ~~Fix next.config.mjs and layout.tsx issues~~ ✓ DONE
+2. ~~Commit and push `feat/supabase-auth`~~ ✓ DONE
+3. **UI overhaul** — modern interactive landing page + About page (in progress)
+4. Build `feat/paddle-billing` — Paddle checkout, webhook, plan enforcement
+5. Build `feat/generation-limits` — enforce free tier 3/month limit
+6. Build `feat/projects-history` — full project list with re-download
+7. Build `feat/landing-polish` — showcase gallery, SEO, testimonials
 
 ---
 

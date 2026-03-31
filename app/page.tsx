@@ -1,253 +1,461 @@
+"use client";
+
 import Link from "next/link";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: i * 0.08 },
+  }),
+};
+
+const STEPS = [
+  {
+    step: "01",
+    title: "Describe your project",
+    desc: "Tell FirmForge what your device does in plain language. The intake agent asks targeted questions until it has a complete picture.",
+    color: "from-blue-500 to-cyan-400",
+    glow: "group-hover:shadow-blue-500/20",
+  },
+  {
+    step: "02",
+    title: "Approve your BOM",
+    desc: "Review a Bill of Materials with live prices from LCSC and Mouser. Swap components, approve, and generation begins.",
+    color: "from-violet-500 to-purple-400",
+    glow: "group-hover:shadow-violet-500/20",
+  },
+  {
+    step: "03",
+    title: "Open-source discovery",
+    desc: "FirmForge searches GitHub, PlatformIO, Arduino, and ESP-IDF for the best available drivers per component.",
+    color: "from-cyan-500 to-teal-400",
+    glow: "group-hover:shadow-cyan-500/20",
+  },
+  {
+    step: "04",
+    title: "Library evaluation",
+    desc: "Each candidate is scored on stars, recency, license, and MCU compatibility. Only the best makes it in.",
+    color: "from-teal-500 to-green-400",
+    glow: "group-hover:shadow-teal-500/20",
+  },
+  {
+    step: "05",
+    title: "Codebase assembly",
+    desc: "Drivers, HAL, middleware, and application layers assembled into a structured project. Claude fills any gaps.",
+    color: "from-green-500 to-emerald-400",
+    glow: "group-hover:shadow-green-500/20",
+  },
+  {
+    step: "06",
+    title: "Download & go",
+    desc: "Browse the generated files in-browser. Download as zip or push directly to a GitHub repo (Pro).",
+    color: "from-amber-500 to-orange-400",
+    glow: "group-hover:shadow-amber-500/20",
+  },
+];
+
+const PLANS = [
+  {
+    name: "Free",
+    price: "$0",
+    per: "",
+    features: ["3 generations / month", "STM32 + ESP32", "Bare-metal only", "Zip download"],
+    missing: ["Compile validation", "RTOS support", "GitHub push"],
+    cta: "Start free",
+    highlight: false,
+  },
+  {
+    name: "Pro",
+    price: "$19",
+    per: "/mo",
+    features: [
+      "Unlimited generations",
+      "All MCU families",
+      "FreeRTOS support",
+      "Compile validation",
+      "GitHub push",
+      "In-browser file preview",
+    ],
+    missing: [],
+    cta: "Start Pro",
+    highlight: true,
+  },
+  {
+    name: "Team",
+    price: "$49",
+    per: "/mo",
+    features: [
+      "Everything in Pro",
+      "REST API access",
+      "CI/CD integration",
+      "5 team seats",
+      "Priority queue",
+    ],
+    missing: [],
+    cta: "Start Team",
+    highlight: false,
+  },
+];
+
+const MCUS = ["STM32", "ESP32", "RP2040", "nRF52", "AVR", "SAME5x"];
 
 export default function Home() {
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+
   return (
-    <main className="min-h-screen bg-gray-950 text-white">
-      {/* Nav */}
-      <nav className="border-b border-white/5 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-semibold tracking-tight">
-            Firm<span className="text-brand-400">Forge</span>
-          </span>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20 font-mono">
-            beta
-          </span>
-        </div>
-        <div className="flex items-center gap-6 text-sm text-gray-400">
-          <Link href="#features" className="hover:text-white transition-colors">Features</Link>
-          <Link href="#pricing" className="hover:text-white transition-colors">Pricing</Link>
-          <Link href="#showcase" className="hover:text-white transition-colors">Showcase</Link>
-          <Link
-            href="/dashboard/generate"
-            className="px-4 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-400 text-white text-sm font-medium transition-colors"
-          >
-            Start building
-          </Link>
-        </div>
-      </nav>
+    <main className="min-h-screen bg-[#060610] text-white overflow-x-hidden">
 
-      {/* Hero */}
-      <section className="relative overflow-hidden px-6 pt-24 pb-32 max-w-7xl mx-auto text-center bg-grid">
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-500/5 via-transparent to-transparent pointer-events-none" />
+      {/* ── Aurora background ── */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full bg-blue-600/10 blur-[120px] animate-pulse-slow" />
+        <div className="absolute top-1/3 -right-40 w-[600px] h-[600px] rounded-full bg-violet-600/10 blur-[120px] animate-pulse-slow" style={{ animationDelay: "1.5s" }} />
+        <div className="absolute bottom-0 left-1/3 w-[500px] h-[500px] rounded-full bg-cyan-600/8 blur-[100px] animate-pulse-slow" style={{ animationDelay: "3s" }} />
+      </div>
 
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm text-gray-300 mb-8">
-          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          AI-powered firmware generation is here
-        </div>
-
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight">
-          Firmware projects,
-          <br />
-          <span className="text-brand-400">assembled in minutes.</span>
-        </h1>
-
-        <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-          Describe what your embedded device does. FirmForge searches the open-source
-          ecosystem, selects the best drivers, and assembles a complete layered codebase
-          — from drivers to application layer.
-        </p>
-
-        <div className="flex items-center justify-center gap-4 flex-wrap">
-          <Link
-            href="/dashboard/generate"
-            className="px-8 py-3.5 rounded-xl bg-brand-500 hover:bg-brand-400 text-white font-semibold text-lg transition-all hover:scale-105"
-          >
-            Generate your project →
-          </Link>
-          <Link
-            href="#showcase"
-            className="px-8 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-lg transition-colors border border-white/10"
-          >
-            See examples
-          </Link>
-        </div>
-
-        {/* Supported MCUs */}
-        <div className="mt-16 flex items-center justify-center gap-3 flex-wrap">
-          <span className="text-sm text-gray-500">Supports</span>
-          {["STM32", "ESP32", "RP2040", "nRF52", "AVR", "SAME5x"].map((mcu) => (
-            <span
-              key={mcu}
-              className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm text-gray-300 font-mono"
-            >
-              {mcu}
+      {/* ── Nav ── */}
+      <motion.nav
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="sticky top-0 z-50 border-b border-white/5 backdrop-blur-xl bg-[#060610]/80 px-6 py-4"
+      >
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 group">
+            <span className="text-lg font-bold tracking-tight">
+              Firm<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Forge</span>
             </span>
-          ))}
-        </div>
-      </section>
-
-      {/* Features */}
-      <section id="features" className="px-6 py-24 max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-4">How FirmForge works</h2>
-        <p className="text-gray-400 text-center mb-16 max-w-xl mx-auto">
-          Six AI agents run in sequence after you approve your Bill of Materials.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[
-            {
-              step: "01",
-              title: "Describe your project",
-              desc: "Tell FirmForge what your device does in plain language. The intake agent asks targeted questions until it has a complete picture.",
-              color: "text-brand-400",
-            },
-            {
-              step: "02",
-              title: "Approve your BOM",
-              desc: "Review a Bill of Materials with live prices from LCSC and Mouser. Swap components, approve, and generation begins.",
-              color: "text-purple-400",
-            },
-            {
-              step: "03",
-              title: "Open-source discovery",
-              desc: "FirmForge searches GitHub, PlatformIO, Arduino, and ESP-IDF for the best available drivers per component.",
-              color: "text-cyan-400",
-            },
-            {
-              step: "04",
-              title: "Library evaluation",
-              desc: "Each candidate is scored on stars, recency, license, and MCU compatibility. Only the best makes it in.",
-              color: "text-teal-400",
-            },
-            {
-              step: "05",
-              title: "Codebase assembly",
-              desc: "Drivers, HAL, middleware, and application layers assembled into a structured project. Claude fills any gaps.",
-              color: "text-green-400",
-            },
-            {
-              step: "06",
-              title: "Download & go",
-              desc: "Browse the generated files in-browser. Download as zip or push directly to a GitHub repo (Pro).",
-              color: "text-amber-400",
-            },
-          ].map((f) => (
-            <div
-              key={f.step}
-              className="p-6 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/10 transition-colors"
+            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono">
+              beta
+            </span>
+          </Link>
+          <div className="flex items-center gap-6 text-sm text-gray-400">
+            <Link href="#features" className="hover:text-white transition-colors hidden md:block">Features</Link>
+            <Link href="#pricing" className="hover:text-white transition-colors hidden md:block">Pricing</Link>
+            <Link href="/about" className="hover:text-white transition-colors hidden md:block">About</Link>
+            <Link
+              href="/auth/login"
+              className="hover:text-white transition-colors"
             >
-              <div className={`font-mono text-sm mb-3 ${f.color}`}>{f.step}</div>
-              <h3 className="font-semibold text-lg mb-2">{f.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
+              Sign in
+            </Link>
+            <Link
+              href="/dashboard/generate"
+              className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 text-white text-sm font-medium transition-all duration-300 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40"
+            >
+              Start building
+            </Link>
+          </div>
+        </div>
+      </motion.nav>
+
+      {/* ── Hero ── */}
+      <section ref={heroRef} className="relative min-h-[90vh] flex flex-col items-center justify-center px-6 pt-16 pb-24 z-10">
+        <motion.div style={{ y: heroY, opacity: heroOpacity }} className="text-center max-w-5xl mx-auto">
+
+          <motion.div
+            variants={fadeUp} initial="hidden" animate="show" custom={0}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-gray-300 mb-10 backdrop-blur-sm"
+          >
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-sm shadow-green-400" />
+            AI-powered firmware generation is here
+          </motion.div>
+
+          <motion.h1
+            variants={fadeUp} initial="hidden" animate="show" custom={1}
+            className="text-6xl md:text-8xl font-bold tracking-tight mb-6 leading-[1.05]"
+          >
+            Firmware projects,
+            <br />
+            <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">
+              assembled in minutes.
+            </span>
+          </motion.h1>
+
+          <motion.p
+            variants={fadeUp} initial="hidden" animate="show" custom={2}
+            className="text-xl text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed"
+          >
+            Describe what your embedded device does. FirmForge searches the open-source
+            ecosystem, selects the best drivers, and assembles a complete layered codebase —
+            from drivers to application layer.
+          </motion.p>
+
+          <motion.div
+            variants={fadeUp} initial="hidden" animate="show" custom={3}
+            className="flex items-center justify-center gap-4 flex-wrap mb-16"
+          >
+            <Link
+              href="/dashboard/generate"
+              className="group px-8 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold text-lg transition-all duration-300 shadow-xl shadow-blue-500/25 hover:shadow-blue-500/50 hover:scale-105 flex items-center gap-2"
+            >
+              Generate your project
+              <span className="group-hover:translate-x-1 transition-transform duration-200">→</span>
+            </Link>
+            <Link
+              href="#features"
+              className="px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-lg transition-all duration-300 border border-white/10 hover:border-white/20 backdrop-blur-sm"
+            >
+              See how it works
+            </Link>
+          </motion.div>
+
+          {/* MCU chips */}
+          <motion.div
+            variants={fadeUp} initial="hidden" animate="show" custom={4}
+            className="flex items-center justify-center gap-3 flex-wrap"
+          >
+            <span className="text-sm text-gray-500">Supports</span>
+            {MCUS.map((mcu, i) => (
+              <motion.span
+                key={mcu}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6 + i * 0.06, duration: 0.3 }}
+                className="px-3 py-1 rounded-full bg-white/5 border border-white/10 hover:border-blue-500/40 hover:bg-blue-500/10 text-sm text-gray-300 font-mono transition-all duration-200 cursor-default"
+              >
+                {mcu}
+              </motion.span>
+            ))}
+          </motion.div>
+        </motion.div>
+
+        {/* Floating terminal card */}
+        <motion.div
+          initial={{ opacity: 0, y: 40, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ delay: 0.8, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="relative mt-20 max-w-2xl w-full mx-auto z-10"
+        >
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 blur-xl" />
+          <div className="relative rounded-2xl border border-white/10 bg-[#0d0d1a]/90 backdrop-blur-xl overflow-hidden shadow-2xl">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+              <div className="w-3 h-3 rounded-full bg-red-500/70" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
+              <div className="w-3 h-3 rounded-full bg-green-500/70" />
+              <span className="ml-2 text-xs text-gray-500 font-mono">firmforge — agent pipeline</span>
             </div>
+            <div className="p-5 font-mono text-sm space-y-2">
+              {[
+                { label: "intake", color: "text-blue-400", msg: "Project spec locked — STM32F4 + BME280 + SSD1306" },
+                { label: "discover", color: "text-violet-400", msg: "Found 14 candidates across GitHub + PlatformIO" },
+                { label: "evaluate", color: "text-cyan-400", msg: "adafruit/Adafruit_BME280 scored 94/100 ✓" },
+                { label: "assemble", color: "text-green-400", msg: "Generating driver + HAL + main.c layers..." },
+                { label: "deliver", color: "text-amber-400", msg: "firmware_stm32f4_weather.zip ready (47 files)" },
+              ].map((line, i) => (
+                <motion.div
+                  key={line.label}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.1 + i * 0.15, duration: 0.4 }}
+                  className="flex items-start gap-3"
+                >
+                  <span className={`${line.color} shrink-0`}>[{line.label}]</span>
+                  <span className="text-gray-300">{line.msg}</span>
+                </motion.div>
+              ))}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.9, duration: 0.3 }}
+                className="flex items-center gap-2 pt-1"
+              >
+                <span className="text-green-400">✓</span>
+                <span className="text-green-400 font-semibold">Pipeline complete in 38s</span>
+                <span className="w-2 h-4 bg-green-400 animate-pulse ml-1" />
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ── Features / How it works ── */}
+      <section id="features" className="relative z-10 px-6 py-32 max-w-7xl mx-auto">
+        <motion.div
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}
+          className="text-center mb-20"
+        >
+          <motion.p variants={fadeUp} custom={0} className="text-blue-400 font-mono text-sm mb-3 uppercase tracking-widest">
+            How it works
+          </motion.p>
+          <motion.h2 variants={fadeUp} custom={1} className="text-4xl md:text-5xl font-bold mb-4">
+            Six agents. One firmware project.
+          </motion.h2>
+          <motion.p variants={fadeUp} custom={2} className="text-gray-400 max-w-xl mx-auto">
+            Each agent runs in sequence after you approve your Bill of Materials.
+            No manual steps. No setup.
+          </motion.p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {STEPS.map((f, i) => (
+            <motion.div
+              key={f.step}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className={`group relative p-6 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300 hover:shadow-2xl ${f.glow} cursor-default`}
+            >
+              <div className={`inline-flex w-10 h-10 rounded-xl bg-gradient-to-br ${f.color} items-center justify-center mb-4 shadow-lg`}>
+                <span className="text-white font-bold text-xs">{f.step}</span>
+              </div>
+              <h3 className="font-semibold text-lg mb-2 text-white">{f.title}</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
+              <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-300`} />
+            </motion.div>
           ))}
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="px-6 py-24 border-t border-white/5">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-4">Simple pricing</h2>
-          <p className="text-gray-400 text-center mb-16">Start free. Upgrade when you need more.</p>
+      {/* ── Stats banner ── */}
+      <section className="relative z-10 border-y border-white/5 bg-white/[0.01] py-16">
+        <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {[
+            { value: "47", label: "Files per project avg." },
+            { value: "<60s", label: "Generation time" },
+            { value: "6", label: "AI agents in pipeline" },
+            { value: "100%", label: "Open-source drivers" },
+          ].map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1, duration: 0.5 }}
+            >
+              <div className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-1">
+                {stat.value}
+              </div>
+              <div className="text-sm text-gray-500">{stat.label}</div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Free",
-                price: "$0",
-                per: "",
-                features: [
-                  "3 generations / month",
-                  "STM32 + ESP32",
-                  "Bare-metal only",
-                  "Zip download",
-                ],
-                missing: ["Compile validation", "RTOS support", "GitHub push"],
-                cta: "Start free",
-                highlight: false,
-              },
-              {
-                name: "Pro",
-                price: "$19",
-                per: "/mo",
-                features: [
-                  "Unlimited generations",
-                  "All MCU families",
-                  "FreeRTOS support",
-                  "Compile validation",
-                  "GitHub push",
-                  "In-browser file preview",
-                ],
-                missing: [],
-                cta: "Start Pro",
-                highlight: true,
-              },
-              {
-                name: "Team",
-                price: "$49",
-                per: "/mo",
-                features: [
-                  "Everything in Pro",
-                  "REST API access",
-                  "CI/CD integration",
-                  "5 team seats",
-                  "Priority queue",
-                ],
-                missing: [],
-                cta: "Start Team",
-                highlight: false,
-              },
-            ].map((plan) => (
-              <div
+      {/* ── Pricing ── */}
+      <section id="pricing" className="relative z-10 px-6 py-32">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial="hidden" whileInView="show" viewport={{ once: true }}
+            className="text-center mb-20"
+          >
+            <motion.p variants={fadeUp} custom={0} className="text-blue-400 font-mono text-sm mb-3 uppercase tracking-widest">
+              Pricing
+            </motion.p>
+            <motion.h2 variants={fadeUp} custom={1} className="text-4xl md:text-5xl font-bold mb-4">
+              Simple, honest pricing
+            </motion.h2>
+            <motion.p variants={fadeUp} custom={2} className="text-gray-400">
+              Start free. Upgrade when you need more.
+            </motion.p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            {PLANS.map((plan, i) => (
+              <motion.div
                 key={plan.name}
-                className={`p-6 rounded-xl border ${
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                className={`relative rounded-2xl p-6 border transition-all duration-300 ${
                   plan.highlight
-                    ? "border-brand-500/50 bg-brand-500/5"
-                    : "border-white/5 bg-white/[0.02]"
+                    ? "border-blue-500/50 bg-gradient-to-b from-blue-500/10 to-transparent scale-105 shadow-2xl shadow-blue-500/10"
+                    : "border-white/5 bg-white/[0.02] hover:border-white/10"
                 }`}
               >
                 {plan.highlight && (
-                  <div className="text-xs text-brand-400 font-mono mb-3 uppercase tracking-wider">
-                    Most popular
-                  </div>
+                  <>
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none" />
+                    <div className="absolute -top-px left-1/2 -translate-x-1/2 px-4 py-1 rounded-b-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-xs font-semibold text-white">
+                      Most popular
+                    </div>
+                  </>
                 )}
-                <div className="font-semibold text-lg mb-1">{plan.name}</div>
+                <div className="font-semibold text-lg mb-1 mt-2">{plan.name}</div>
                 <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-4xl font-bold">{plan.price}</span>
+                  <span className="text-5xl font-bold">{plan.price}</span>
                   <span className="text-gray-400 text-sm">{plan.per}</span>
                 </div>
-                <div className="space-y-2 mb-8">
+                <div className="space-y-2.5 mb-8">
                   {plan.features.map((f) => (
-                    <div key={f} className="flex items-center gap-2 text-sm text-gray-300">
-                      <span className="text-green-400 text-xs">✓</span>
+                    <div key={f} className="flex items-center gap-2.5 text-sm text-gray-300">
+                      <span className="w-4 h-4 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-xs shrink-0">✓</span>
                       {f}
                     </div>
                   ))}
                   {plan.missing.map((f) => (
-                    <div key={f} className="flex items-center gap-2 text-sm text-gray-600">
-                      <span className="text-xs">—</span>
+                    <div key={f} className="flex items-center gap-2.5 text-sm text-gray-600">
+                      <span className="w-4 h-4 flex items-center justify-center text-xs shrink-0">—</span>
                       {f}
                     </div>
                   ))}
                 </div>
                 <Link
                   href="/dashboard/generate"
-                  className={`block text-center py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  className={`block text-center py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
                     plan.highlight
-                      ? "bg-brand-500 hover:bg-brand-400 text-white"
-                      : "bg-white/5 hover:bg-white/10 text-white border border-white/10"
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40"
+                      : "bg-white/5 hover:bg-white/10 text-white border border-white/10 hover:border-white/20"
                   }`}
                 >
                   {plan.cta}
                 </Link>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/5 px-6 py-8 text-center text-sm text-gray-500">
-        <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
+      {/* ── CTA banner ── */}
+      <section className="relative z-10 px-6 py-24">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="max-w-3xl mx-auto text-center"
+        >
+          <div className="relative rounded-3xl border border-blue-500/20 bg-gradient-to-b from-blue-500/10 to-violet-500/5 p-16 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-cyan-600/5 to-violet-600/5" />
+            <h2 className="relative text-4xl md:text-5xl font-bold mb-4">
+              Ready to build your<br />
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                next firmware project?
+              </span>
+            </h2>
+            <p className="relative text-gray-400 mb-10 text-lg">
+              Join engineers shipping embedded products faster with AI.
+            </p>
+            <Link
+              href="/dashboard/generate"
+              className="relative inline-flex items-center gap-2 px-10 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold text-lg transition-all duration-300 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105"
+            >
+              Start for free →
+            </Link>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer className="relative z-10 border-t border-white/5 px-6 py-10">
+        <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4 text-sm text-gray-500">
           <span>
-            Firm<span className="text-brand-400">Forge</span> © 2026
+            Firm<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-semibold">Forge</span> © 2026
           </span>
           <div className="flex gap-6">
+            <Link href="/about" className="hover:text-white transition-colors">About</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-            <a href="https://github.com/Faiez-ali/firmforge" className="hover:text-white transition-colors">
-              GitHub
-            </a>
+            <a href="https://github.com/Faiez-ali/firmforge" className="hover:text-white transition-colors">GitHub</a>
           </div>
         </div>
       </footer>
