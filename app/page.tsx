@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import McuShowcase from "@/components/mcu/McuShowcase";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -313,6 +314,32 @@ export default function Home() {
             </motion.div>
           ))}
         </div>
+      </section>
+
+      {/* ── MCU Showcase ── */}
+      <section className="relative z-10 px-6 py-24 max-w-5xl mx-auto">
+        <motion.div
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}
+          className="text-center mb-16"
+        >
+          <motion.p variants={fadeUp} custom={0} className="text-blue-400 font-mono text-sm mb-3 uppercase tracking-widest">
+            Hardware support
+          </motion.p>
+          <motion.h2 variants={fadeUp} custom={1} className="text-4xl md:text-5xl font-bold mb-4">
+            Pick your chip.
+          </motion.h2>
+          <motion.p variants={fadeUp} custom={2} className="text-gray-400 max-w-xl mx-auto">
+            FirmForge knows every quirk of each platform. Select yours and we handle the rest.
+          </motion.p>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <McuShowcase />
+        </motion.div>
       </section>
 
       {/* ── Stats banner ── */}

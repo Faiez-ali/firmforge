@@ -12,14 +12,6 @@ const fadeUp = {
   }),
 };
 
-const STACK = [
-  { name: "Next.js 14", desc: "App Router, React Server Components, streaming", color: "from-white/20 to-white/5" },
-  { name: "Claude AI", desc: "Haiku for intake & hints · Sonnet for assembly", color: "from-orange-500/20 to-orange-500/5" },
-  { name: "Supabase", desc: "Postgres database · Auth · Row-level security", color: "from-green-500/20 to-green-500/5" },
-  { name: "Cloudflare R2", desc: "Generated firmware zip storage", color: "from-orange-400/20 to-orange-400/5" },
-  { name: "Paddle", desc: "Merchant of record · Pakistan-compatible payments", color: "from-blue-500/20 to-blue-500/5" },
-  { name: "Vercel", desc: "Edge deployment · main → production", color: "from-white/20 to-white/5" },
-];
 
 const LAYERS = [
   { name: "Application layer", desc: "main.c, tasks, state machines", source: "Claude-generated", color: "bg-blue-500/20 text-blue-300" },
@@ -216,36 +208,6 @@ export default function AboutPage() {
               >
                 <div className="text-xl font-bold mb-1">{mcu.name}</div>
                 <div className="text-xs opacity-70">{mcu.status}</div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.section>
-
-        {/* ── Tech stack ── */}
-        <motion.section
-          initial="hidden" whileInView="show" viewport={{ once: true }}
-        >
-          <motion.p variants={fadeUp} custom={0} className="text-blue-400 font-mono text-sm mb-3 uppercase tracking-widest">
-            Tech stack
-          </motion.p>
-          <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-bold mb-3">
-            What FirmForge is built on
-          </motion.h2>
-          <motion.p variants={fadeUp} custom={2} className="text-gray-400 mb-10">
-            A tight, modern stack chosen for low operational overhead and fast iteration.
-          </motion.p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {STACK.map((item, i) => (
-              <motion.div
-                key={item.name}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.07, duration: 0.4 }}
-                className={`p-5 rounded-xl border border-white/5 bg-gradient-to-br ${item.color} hover:border-white/10 transition-all duration-200`}
-              >
-                <div className="font-semibold text-white mb-1">{item.name}</div>
-                <div className="text-sm text-gray-400">{item.desc}</div>
               </motion.div>
             ))}
           </div>
