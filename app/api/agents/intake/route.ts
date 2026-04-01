@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+
+export const runtime = "nodejs";
 import { createAdminClient } from "@/lib/supabase/server";
 import { randomUUID } from "crypto";
 import type { ProjectSpec, BOM } from "@/types";

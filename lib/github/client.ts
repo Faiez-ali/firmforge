@@ -46,7 +46,7 @@ export async function searchGitHubLibraries(
     description: repo.description ?? "",
     url: repo.html_url,
     source: "github" as const,
-    license: normalizeLicense(repo.license?.spdx_id),
+    license: normalizeLicense(repo.license?.spdx_id ?? undefined),
     stars: repo.stargazers_count,
     lastCommit: repo.pushed_at ?? undefined,
     mcuCompatibility: [mcu],
