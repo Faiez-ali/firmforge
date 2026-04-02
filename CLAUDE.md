@@ -198,6 +198,48 @@ GITHUB_API_TOKEN
 
 ---
 
+## ⚠️ BLOCKED — Waiting on credentials (DO NOT SKIP)
+
+These tasks are blocked on missing credentials and MUST be completed before
+Phase 1 testing can proceed. Do not skip or defer them.
+
+### 1. Anthropic API credits — CRITICAL
+- **Blocker:** Credit balance = $0. All Claude API calls fail (intake, assemble, deliver agents).
+- **Action:** Top up at https://console.anthropic.com/settings/billing
+- **Unblocks:** `npx tsx scripts/test-pipeline.ts --agent intake --case 1` (and all 5 cases for all 3 agents)
+
+### 2. Vercel environment variables — CRITICAL
+These are NOT set in the Vercel project dashboard. Without them:
+- Middleware silently bypasses all auth (500 MIDDLEWARE_INVOCATION_FAILED without the guard)
+- Dashboard routes are unprotected
+- Auth (login/signup) cannot connect to Supabase
+
+Go to: https://vercel.com/faiez-alis-projects/firmforge/settings/environment-variables
+
+| Variable | Source |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase dashboard → Project Settings → API |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Same page |
+| `SUPABASE_SERVICE_ROLE_KEY` | Same page (service_role key) |
+| `CLAUDE_API_KEY` | console.anthropic.com (after topping up) |
+| `GITHUB_API_TOKEN` | github.com → Settings → Developer settings → Personal access tokens |
+
+### 3. Phase 1 agent tests — blocked on #1 above
+Once Anthropic credits are added, run in order:
+```bash
+npx tsx scripts/test-pipeline.ts --agent intake --case 1
+npx tsx scripts/test-pipeline.ts --agent intake --all
+npx tsx scripts/test-pipeline.ts --agent assemble --case 1
+npx tsx scripts/test-pipeline.ts --agent assemble --all
+npx tsx scripts/test-pipeline.ts --agent deliver --case 1
+npx tsx scripts/test-pipeline.ts --all
+```
+
+### 4. Open PRs to merge
+- `fix/middleware-500` — middleware Supabase env var guard (ready to merge)
+
+---
+
 ## Notion project notebook
 
 Full session logs, decisions, roadmap, and brainstorm docs live at:
