@@ -172,6 +172,14 @@ GITHUB_API_TOKEN
 ## Known issues to fix (as of session 4)
 
 1. `next.config.ts` → must be renamed `next.config.mjs` (Next.js 14 limitation)
+
+## Maintenance backlog (non-blocking, do in a future sprint)
+
+- Upgrade ESLint 8 → 9 + migrate to flat config format (`eslint.config.js`).
+  This will eliminate the `eslint@8.57.1` deprecation warning and clean up
+  the `@humanwhocodes/config-array`, `@humanwhocodes/object-schema`, `rimraf`,
+  `glob`, and `inflight` transitive dep warnings seen in Vercel build logs.
+  Not urgent — ESLint 8 still works, this is purely a maintenance item.
 2. `app/layout.tsx` → uses `Geist` font (Next.js 15 only) → replace with `Inter` + `JetBrains_Mono`
 3. Run `npm audit fix` to address 17 vulnerabilities from npm install
 
