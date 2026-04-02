@@ -185,14 +185,44 @@ GITHUB_API_TOKEN
 
 ---
 
-## Current task queue (in priority order)
+## Current deployment status (as of 3 April 2026)
 
-1. Fix next.config.mjs and layout.tsx issues — get `npm run dev` running clean
-2. Commit and push `feat/supabase-auth` branch (files already exist locally)
-3. Build `feat/paddle-billing` — Paddle checkout, webhook, plan enforcement
-4. Build `feat/generation-limits` — enforce free tier 3/month limit
-5. Build `feat/projects-history` — full project list with re-download
-6. Build `feat/landing-polish` — showcase gallery, SEO, testimonials
+- **Vercel production + preview:** ✅ Clean build, 14 routes, no errors
+- **GitHub Actions CI:** ✅ npm ci → type-check → Vercel deploy on every push
+- **Auth pages:** ✅ `/auth/login` and `/auth/signup` render correctly
+- **Middleware:** ✅ Gracefully bypasses auth when Supabase env vars absent
+- **Discover agent (all 5 cases):** ✅ Pass
+- **Evaluate agent (all 5 cases):** ✅ Pass
+- **Intake / Assemble / Deliver agents:** ❌ Blocked — no Anthropic API credits
+
+## Open PRs (merge when ready)
+
+- `fix/middleware-500` — middleware Supabase env guard (safe to merge)
+- `chore/maintenance-backlog` — ESLint backlog note in CLAUDE.md (safe to merge)
+
+## ⚠️ Blocked — waiting on credentials (DO NOT SKIP)
+
+### 1. Anthropic API credits — CRITICAL
+- All Claude agents fail with "credit balance too low"
+- Top up at: https://console.anthropic.com/settings/billing
+- Unblocks all Phase 1 agent testing
+
+### 2. Look for any missing portions in the project
+- Claude along withh Codex should review the compplete code.
+- Create different simulation scenarios and check for any anomolies.
+- Make a complete plan to fix those anomolies so that the instant fixes won't createw bugs in future.
+
+## Next session priorities
+
+When Anthropic credits are topped up, run in this order:
+```bash
+npx tsx scripts/test-pipeline.ts --agent intake --all
+npx tsx scripts/test-pipeline.ts --agent assemble --all
+npx tsx scripts/test-pipeline.ts --agent deliver --all
+npx tsx scripts/test-pipeline.ts --all
+```
+Then do Phase 3 acceptance review — Faiez reviews generated firmware output
+as an embedded engineer before starting Phase 4 (billing, UI, limits).
 
 ---
 

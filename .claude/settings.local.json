@@ -4,7 +4,13 @@
       "Bash(node -e \"const p=require('./package.json'); const all={...p.dependencies,...p.devDependencies}; ['ts-node','tsx','dotenv'].forEach(k=>console.log(k+':', all[k]||'NOT INSTALLED'))\")",
       "Bash(npm install:*)",
       "Bash(npx tsx:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(npm run:*)",
+      "Bash(vercel --version)",
+      "Bash(vercel whoami:*)",
+      "Bash(vercel link:*)",
+      "Bash(vercel inspect:*)",
+      "mcp__claude_ai_Notion__notion-update-page"
     ]
   }
 }

@@ -40,3 +40,5 @@ next-env.d.ts
 # Generated output (dev only)
 /tmp/
 /generated/
+
+.vercel
