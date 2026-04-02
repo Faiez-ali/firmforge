@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "outDir": ".ts-scripts-out"
+  },
+  "include": ["scripts/**/*.ts", "__tests__/**/*.ts", "types/**/*.ts", "lib/**/*.ts"]
+}
