@@ -347,7 +347,7 @@ export async function discoverLibraries(
     componentsToSearch.push(component.name);
   }
   if (spec.rtos === "freertos") componentsToSearch.push("FreeRTOS");
-  if (spec.rtos === "zephyr") componentsToSearch.push("Zephyr");
+  // Zephyr is v1.1 — not yet supported, disabled in UI
 
   for (const componentName of componentsToSearch) {
     onProgress?.(`Searching for ${componentName} drivers...`);

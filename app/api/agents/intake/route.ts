@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { randomUUID } from "crypto";
 import type { ProjectSpec, BOM } from "@/types";
 
@@ -9,12 +9,20 @@ export async function POST(req: NextRequest) {
   try {
     const { spec, bom }: { spec: ProjectSpec; bom: BOM } = await req.json();
 
+    // Verify the user is authenticated
+    const supabaseAuth = await createClient();
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const projectId = randomUUID();
     const supabase = createAdminClient();
 
     // Save project record to Supabase
     const { error } = await supabase.from("projects").insert({
       id: projectId,
+      user_id: user.id,
       spec,
       bom,
       status: "generating",

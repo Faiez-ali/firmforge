@@ -13,6 +13,7 @@ interface ProgressMessage {
 interface Props {
   projectId: string;
   spec: ProjectSpec;
+  bom: BOM;
   onComplete: (output: { files: GeneratedFile[]; downloadUrl: string; readme: string }) => void;
 }
 
@@ -23,7 +24,7 @@ const STEP_LABELS: Record<string, string> = {
   deliver: "Packaging & uploading",
 };
 
-export default function GenerationProgress({ projectId, spec, onComplete }: Props) {
+export default function GenerationProgress({ projectId, spec, bom, onComplete }: Props) {
   const [messages, setMessages] = useState<ProgressMessage[]>([]);
   const [stepStatus, setStepStatus] = useState<Record<string, "pending" | "running" | "done" | "error">>({
     discover: "pending",
@@ -48,7 +49,7 @@ export default function GenerationProgress({ projectId, spec, onComplete }: Prop
         const res = await fetch("/api/stream", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ projectId, spec }),
+          body: JSON.stringify({ projectId, spec, bom }),
           signal: controller?.signal,
         });
 
@@ -115,7 +116,7 @@ export default function GenerationProgress({ projectId, spec, onComplete }: Prop
       controller?.abort();
       controller = null;
     };
-  }, [projectId, spec, onComplete]);
+  }, [projectId, spec, bom, onComplete]);
 
   // Auto-scroll terminal
   useEffect(() => {

@@ -119,7 +119,8 @@ Price in USD. Use realistic market prices from LCSC/Mouser.`;
       currency: "USD",
       notes: parsed.notes,
     };
-  } catch {
+  } catch (err) {
+    console.error("BOM parse failed — Claude returned non-JSON:", err);
     return { items: [], totalEstimatedCost: 0, currency: "USD" };
   }
 }
