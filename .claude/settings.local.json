@@ -10,7 +10,10 @@
       "Bash(vercel whoami:*)",
       "Bash(vercel link:*)",
       "Bash(vercel inspect:*)",
-      "mcp__claude_ai_Notion__notion-update-page"
+      "mcp__claude_ai_Notion__notion-update-page",
+      "Bash(npx tsc:*)",
+      "Bash(grep -v \"^$\")",
+      "mcp__claude_ai_Notion__notion-create-pages"
     ]
   }
 }
