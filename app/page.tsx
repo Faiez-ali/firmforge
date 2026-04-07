@@ -4,6 +4,8 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import McuShowcase from "@/components/mcu/McuShowcase";
+import CircuitBg from "@/components/hero/CircuitBg";
+import StepPlayer from "@/components/how-it-works/StepPlayer";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -13,51 +15,6 @@ const fadeUp = {
     transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: i * 0.08 },
   }),
 };
-
-const STEPS = [
-  {
-    step: "01",
-    title: "Describe your project",
-    desc: "Tell FirmForge what your device does in plain language. The intake agent asks targeted questions until it has a complete picture.",
-    color: "from-blue-500 to-cyan-400",
-    glow: "group-hover:shadow-blue-500/20",
-  },
-  {
-    step: "02",
-    title: "Approve your BOM",
-    desc: "Review a Bill of Materials with live prices from LCSC and Mouser. Swap components, approve, and generation begins.",
-    color: "from-violet-500 to-purple-400",
-    glow: "group-hover:shadow-violet-500/20",
-  },
-  {
-    step: "03",
-    title: "Open-source discovery",
-    desc: "FirmForge searches GitHub, PlatformIO, Arduino, and ESP-IDF for the best available drivers per component.",
-    color: "from-cyan-500 to-teal-400",
-    glow: "group-hover:shadow-cyan-500/20",
-  },
-  {
-    step: "04",
-    title: "Library evaluation",
-    desc: "Each candidate is scored on stars, recency, license, and MCU compatibility. Only the best makes it in.",
-    color: "from-teal-500 to-green-400",
-    glow: "group-hover:shadow-teal-500/20",
-  },
-  {
-    step: "05",
-    title: "Codebase assembly",
-    desc: "Drivers, HAL, middleware, and application layers assembled into a structured project. Claude fills any gaps.",
-    color: "from-green-500 to-emerald-400",
-    glow: "group-hover:shadow-green-500/20",
-  },
-  {
-    step: "06",
-    title: "Download & go",
-    desc: "Browse the generated files in-browser. Download as zip or push directly to a GitHub repo (Pro).",
-    color: "from-amber-500 to-orange-400",
-    glow: "group-hover:shadow-amber-500/20",
-  },
-];
 
 const PLANS = [
   {
@@ -113,11 +70,10 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#060610] text-white overflow-x-hidden">
 
-      {/* ── Aurora background ── */}
+      {/* ── Page-level aurora (below the fold) ── */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full bg-blue-600/10 blur-[120px] animate-pulse-slow" />
-        <div className="absolute top-1/3 -right-40 w-[600px] h-[600px] rounded-full bg-violet-600/10 blur-[120px] animate-pulse-slow" style={{ animationDelay: "1.5s" }} />
-        <div className="absolute bottom-0 left-1/3 w-[500px] h-[500px] rounded-full bg-cyan-600/8 blur-[100px] animate-pulse-slow" style={{ animationDelay: "3s" }} />
+        <div className="absolute top-1/3 -right-40 w-[600px] h-[600px] rounded-full bg-violet-600/8 blur-[120px] animate-pulse-slow" style={{ animationDelay: "1.5s" }} />
+        <div className="absolute bottom-0 left-1/3 w-[500px] h-[500px] rounded-full bg-cyan-600/6 blur-[100px] animate-pulse-slow" style={{ animationDelay: "3s" }} />
       </div>
 
       {/* ── Nav ── */}
@@ -157,8 +113,23 @@ export default function Home() {
       </motion.nav>
 
       {/* ── Hero ── */}
-      <section ref={heroRef} className="relative min-h-[90vh] flex flex-col items-center justify-center px-6 pt-16 pb-24 z-10">
-        <motion.div style={{ y: heroY, opacity: heroOpacity }} className="text-center max-w-5xl mx-auto">
+      <section ref={heroRef} className="relative min-h-[90vh] flex flex-col items-center justify-center px-6 pt-16 pb-24 z-10 overflow-hidden">
+
+        {/* Circuit board background animation */}
+        <CircuitBg />
+
+        {/* Radial gradient mask so text stays readable over the circuit */}
+        <div
+          className="absolute inset-0 pointer-events-none z-[1]"
+          style={{
+            background:
+              "radial-gradient(ellipse 70% 60% at 50% 40%, transparent 0%, #060610 85%)",
+          }}
+        />
+
+        {/* Subtle blue glow centered on the hero */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full bg-blue-600/10 blur-[100px] pointer-events-none z-[1]" />
+        <motion.div style={{ y: heroY, opacity: heroOpacity }} className="relative z-10 text-center max-w-5xl mx-auto">
 
           <motion.div
             variants={fadeUp} initial="hidden" animate="show" custom={0}
@@ -232,7 +203,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 40, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ delay: 0.8, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="relative mt-20 max-w-2xl w-full mx-auto z-10"
+          className="relative mt-20 max-w-2xl w-full mx-auto z-20"
         >
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 blur-xl" />
           <div className="relative rounded-2xl border border-white/10 bg-[#0d0d1a]/90 backdrop-blur-xl overflow-hidden shadow-2xl">
@@ -276,11 +247,11 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ── Features / How it works ── */}
-      <section id="features" className="relative z-10 px-6 py-32 max-w-7xl mx-auto">
+      {/* ── How it works — interactive step player ── */}
+      <section id="features" className="relative z-10 px-6 py-32 max-w-5xl mx-auto">
         <motion.div
           initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}
-          className="text-center mb-20"
+          className="text-center mb-14"
         >
           <motion.p variants={fadeUp} custom={0} className="text-blue-400 font-mono text-sm mb-3 uppercase tracking-widest">
             How it works
@@ -289,31 +260,19 @@ export default function Home() {
             Six agents. One firmware project.
           </motion.h2>
           <motion.p variants={fadeUp} custom={2} className="text-gray-400 max-w-xl mx-auto">
-            Each agent runs in sequence after you approve your Bill of Materials.
-            No manual steps. No setup.
+            Watch the pipeline run — each step animates automatically.
+            Click any tab to jump, or use the controls below.
           </motion.p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {STEPS.map((f, i) => (
-            <motion.div
-              key={f.step}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              className={`group relative p-6 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300 hover:shadow-2xl ${f.glow} cursor-default`}
-            >
-              <div className={`inline-flex w-10 h-10 rounded-xl bg-gradient-to-br ${f.color} items-center justify-center mb-4 shadow-lg`}>
-                <span className="text-white font-bold text-xs">{f.step}</span>
-              </div>
-              <h3 className="font-semibold text-lg mb-2 text-white">{f.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
-              <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-300`} />
-            </motion.div>
-          ))}
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <StepPlayer />
+        </motion.div>
       </section>
 
       {/* ── MCU Showcase ── */}

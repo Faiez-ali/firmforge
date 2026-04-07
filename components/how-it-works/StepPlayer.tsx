@@ -1,0 +1,561 @@
+"use client";
+
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const STEP_DURATION = 5200; // ms per step before auto-advance
+
+// ── Individual scene components ───────────────────────────────────────────────
+
+function IntakeScene({ active }: { active: boolean }) {
+  const messages = [
+    { role: "user", text: "I want to build a weather station with a display." },
+    { role: "ai",   text: "Great. What MCU are you targeting?" },
+    { role: "user", text: "STM32F407 — I have a dev board already." },
+    { role: "ai",   text: "Which sensors do you need?" },
+    { role: "user", text: "BME280 for temp/humidity, SSD1306 OLED display." },
+    { role: "ai",   text: "Spec locked ✓  Generating BOM..." },
+  ];
+  return (
+    <div className="flex flex-col gap-3 p-6 h-full justify-center max-w-md mx-auto w-full">
+      {messages.map((msg, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, y: 8, x: msg.role === "user" ? 16 : -16 }}
+          animate={active ? { opacity: 1, y: 0, x: 0 } : { opacity: 0, y: 8 }}
+          transition={{ delay: active ? i * 0.42 : 0, duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+          className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+        >
+          <div className={`px-4 py-2.5 rounded-2xl text-sm max-w-[85%] ${
+            msg.role === "user"
+              ? "bg-blue-600/80 text-white rounded-tr-sm"
+              : "bg-white/5 border border-white/10 text-gray-200 rounded-tl-sm"
+          }`}>
+            {msg.role === "ai" && (
+              <span className="text-blue-400 font-mono text-[10px] block mb-0.5 uppercase tracking-wider">
+                FirmForge AI
+              </span>
+            )}
+            {msg.text}
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+function BOMScene({ active }: { active: boolean }) {
+  const items = [
+    { name: "STM32F407VGT6",           cat: "MCU",     price: "$8.50" },
+    { name: "BME280",                  cat: "Sensor",  price: "$3.20" },
+    { name: "SSD1306 OLED 128×64",     cat: "Display", price: "$2.40" },
+    { name: "Decoupling caps / pulls", cat: "Passive", price: "$1.20" },
+  ];
+  return (
+    <div className="p-6 h-full flex flex-col justify-center max-w-md mx-auto w-full">
+      <div className="rounded-xl border border-white/10 overflow-hidden mb-4">
+        <div className="grid grid-cols-3 text-[10px] font-mono text-gray-500 px-4 py-2 border-b border-white/5 bg-white/[0.02] uppercase tracking-wider">
+          <span>Component</span><span>Category</span><span className="text-right">Unit price</span>
+        </div>
+        {items.map((item, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, x: -14 }}
+            animate={active ? { opacity: 1, x: 0 } : { opacity: 0 }}
+            transition={{ delay: active ? 0.15 + i * 0.32 : 0, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="grid grid-cols-3 px-4 py-2.5 text-sm border-b border-white/5"
+          >
+            <span className="text-gray-200 font-medium truncate text-xs">{item.name}</span>
+            <span className="text-gray-500 text-[10px] font-mono self-center">{item.cat}</span>
+            <span className="text-cyan-400 text-right font-mono text-xs">{item.price}</span>
+          </motion.div>
+        ))}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={active ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ delay: active ? 1.6 : 0, duration: 0.4 }}
+          className="flex justify-between px-4 py-2.5 bg-white/[0.02] text-sm"
+        >
+          <span className="text-gray-400">Total estimate</span>
+          <span className="text-white font-bold font-mono">$15.30</span>
+        </motion.div>
+      </div>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={active ? { opacity: 1, scale: 1 } : { opacity: 0 }}
+        transition={{ delay: active ? 2.0 : 0, duration: 0.4 }}
+        className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold text-sm text-center cursor-default select-none"
+      >
+        Approve BOM &amp; Generate →
+      </motion.div>
+    </div>
+  );
+}
+
+function DiscoverScene({ active }: { active: boolean }) {
+  const repos = [
+    { name: "BoschSensortec/BME280_driver", stars: "990",  license: "BSD-3-Clause", tag: "BME280",  score: 96 },
+    { name: "adafruit/Adafruit_SSD1306",    stars: "1.8k", license: "BSD-2-Clause", tag: "SSD1306", score: 89 },
+    { name: "FreeRTOS/FreeRTOS-Kernel",     stars: "4.1k", license: "MIT",          tag: "RTOS",    score: 97 },
+  ];
+  return (
+    <div className="p-6 h-full flex flex-col justify-center max-w-md mx-auto w-full gap-3">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={active ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ delay: 0.1 }}
+        className="font-mono text-[11px] text-gray-500 flex items-center gap-2"
+      >
+        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+        Searching GitHub · PlatformIO · ESP-IDF repos...
+      </motion.div>
+      {repos.map((r, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, x: 28 }}
+          animate={active ? { opacity: 1, x: 0 } : { opacity: 0 }}
+          transition={{ delay: active ? 0.45 + i * 0.48 : 0, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className="rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 flex items-center gap-4"
+        >
+          <div className="flex-1 min-w-0">
+            <div className="text-blue-400 text-xs font-mono truncate mb-1">{r.name}</div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 font-mono">{r.license}</span>
+              <span className="text-[10px] text-gray-500">for {r.tag}</span>
+            </div>
+          </div>
+          <div className="shrink-0 text-right">
+            <div className="text-yellow-400 text-xs font-mono mb-1">⭐ {r.stars}</div>
+            <div className="text-[10px] text-gray-500 font-mono">score {r.score}</div>
+          </div>
+        </motion.div>
+      ))}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={active ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ delay: active ? 2.3 : 0 }}
+        className="text-green-400 text-xs font-mono"
+      >
+        ✓ Found 14 candidates · checking 3 more sources...
+      </motion.div>
+    </div>
+  );
+}
+
+function EvaluateScene({ active }: { active: boolean }) {
+  const libs = [
+    { name: "BoschSensortec/BME280_driver", score: 96, selected: true,  criteria: ["Stars: 990", "License: BSD-3", "MCU: ✓"] },
+    { name: "adafruit/Adafruit_BME280",     score: 78, selected: false, criteria: ["Stars: 1.2k", "License: MIT",   "MCU: ✓"] },
+    { name: "finitespace/BME280",           score: 59, selected: false, criteria: ["Stars: 310",  "License: MIT",   "MCU: ✓"] },
+  ];
+  return (
+    <div className="p-6 h-full flex flex-col justify-center max-w-md mx-auto w-full gap-3">
+      <div className="text-[10px] text-gray-500 font-mono uppercase tracking-wider mb-1">
+        Scoring: stars · recency · license · MCU compatibility
+      </div>
+      {libs.map((lib, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, y: 10 }}
+          animate={active ? { opacity: 1, y: 0 } : { opacity: 0 }}
+          transition={{ delay: active ? i * 0.38 : 0, duration: 0.4 }}
+          className={`rounded-xl border p-3.5 ${lib.selected ? "border-green-500/40 bg-green-500/5" : "border-white/5 bg-white/[0.02]"}`}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-mono text-gray-300 truncate">{lib.name}</span>
+            <span className={`text-sm font-bold shrink-0 ml-2 ${lib.selected ? "text-green-400" : "text-gray-500"}`}>
+              {lib.score}<span className="text-[10px] font-normal">/100</span>
+            </span>
+          </div>
+          <div className="h-1.5 rounded-full bg-white/5 overflow-hidden mb-2">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={active ? { width: `${lib.score}%` } : { width: 0 }}
+              transition={{ delay: active ? i * 0.38 + 0.2 : 0, duration: 0.65, ease: "easeOut" }}
+              className={`h-full rounded-full ${lib.selected ? "bg-gradient-to-r from-green-500 to-emerald-400" : "bg-gray-600"}`}
+            />
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {lib.criteria.map((c) => (
+              <span key={c} className="text-[10px] font-mono text-gray-500">{c}</span>
+            ))}
+            {lib.selected && <span className="text-[10px] font-mono text-green-400 ml-auto">✓ SELECTED</span>}
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+function AssembleScene({ active }: { active: boolean }) {
+  const files = [
+    "src/main.c",
+    "src/bme280_driver.c",
+    "src/ssd1306.c",
+    "src/hal_gpio.c",
+    "src/hal_spi.c",
+    "include/config.h",
+    "CMakeLists.txt",
+    "README.md",
+  ];
+  const codeLines = [
+    { c: "text-gray-600", t: "// FirmForge — auto-generated" },
+    { c: "text-blue-400",  t: '#include "bme280_driver.h"' },
+    { c: "text-blue-400",  t: '#include "ssd1306.h"' },
+    { c: "text-gray-600", t: "" },
+    { c: "text-cyan-400",  t: "int main(void) {" },
+    { c: "text-gray-400",  t: "  HAL_Init();" },
+    { c: "text-gray-400",  t: "  SystemClock_Config();" },
+    { c: "text-gray-400",  t: "  BME280_Init(&hspi1);" },
+    { c: "text-gray-400",  t: "  SSD1306_Init(&hi2c1);" },
+    { c: "text-green-400", t: "  // Application loop ready" },
+  ];
+  return (
+    <div className="p-4 h-full flex gap-3 max-w-2xl mx-auto w-full">
+      {/* File tree */}
+      <div className="w-40 shrink-0 pt-1">
+        <div className="text-[10px] text-gray-500 font-mono mb-2 px-1">firmware_stm32f4/</div>
+        {files.map((f, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, x: -8 }}
+            animate={active ? { opacity: 1, x: 0 } : { opacity: 0 }}
+            transition={{ delay: active ? 0.15 + i * 0.28 : 0, duration: 0.3 }}
+            className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono text-gray-400"
+          >
+            <span className="text-gray-700 text-[9px]">›</span> {f}
+          </motion.div>
+        ))}
+      </div>
+      {/* Code panel */}
+      <div className="flex-1 rounded-lg bg-[#0a0a14] border border-white/5 p-3 overflow-hidden">
+        <div className="text-[10px] font-mono text-gray-600 mb-2 pb-2 border-b border-white/5">main.c</div>
+        {codeLines.map((line, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0 }}
+            animate={active ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ delay: active ? 0.7 + i * 0.22 : 0, duration: 0.25 }}
+            className={`font-mono text-[11px] leading-[1.6] ${line.c}`}
+          >
+            {line.t || "\u00A0"}
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DeliverScene({ active }: { active: boolean }) {
+  return (
+    <div className="p-6 h-full flex flex-col items-center justify-center gap-5 max-w-sm mx-auto w-full">
+      <motion.div
+        initial={{ scale: 0.6, opacity: 0 }}
+        animate={active ? { scale: 1, opacity: 1 } : { scale: 0.6, opacity: 0 }}
+        transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="relative"
+      >
+        <div className="w-20 h-24 rounded-xl bg-gradient-to-b from-blue-500/20 to-cyan-500/10 border border-blue-500/30 flex flex-col items-center justify-center gap-1.5 shadow-xl shadow-blue-500/10">
+          <span className="text-3xl">📦</span>
+          <span className="text-[10px] font-mono text-blue-400">.zip</span>
+        </div>
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={active ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
+          transition={{ delay: 0.7, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-xs text-white shadow-lg shadow-green-500/40"
+        >
+          ✓
+        </motion.div>
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={active ? { opacity: 1, y: 0 } : { opacity: 0 }}
+        transition={{ delay: 0.9 }}
+        className="text-center"
+      >
+        <div className="text-white font-semibold font-mono text-sm mb-1">firmware_stm32f4_weather.zip</div>
+        <div className="text-gray-500 text-xs">47 files · HAL + drivers + application layer</div>
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={active ? { opacity: 1, scale: 1 } : { opacity: 0 }}
+        transition={{ delay: 1.4 }}
+        className="flex gap-3 w-full"
+      >
+        <div className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold text-center cursor-default select-none">
+          ↓ Download zip
+        </div>
+        <div className="flex-1 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm text-center cursor-default select-none">
+          Browse files →
+        </div>
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={active ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ delay: 2.0 }}
+        className="text-green-400 font-mono text-xs flex items-center gap-2"
+      >
+        <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+        Pipeline complete in 42s
+      </motion.div>
+    </div>
+  );
+}
+
+// ── Step metadata ─────────────────────────────────────────────────────────────
+
+const STEPS = [
+  {
+    id: "intake",
+    label: "Describe",
+    sublabel: "AI intake agent",
+    icon: "💬",
+    Scene: IntakeScene,
+    accent: "blue",
+  },
+  {
+    id: "bom",
+    label: "Approve BOM",
+    sublabel: "Bill of Materials",
+    icon: "📋",
+    Scene: BOMScene,
+    accent: "violet",
+  },
+  {
+    id: "discover",
+    label: "Discovery",
+    sublabel: "GitHub + PlatformIO",
+    icon: "🔍",
+    Scene: DiscoverScene,
+    accent: "cyan",
+  },
+  {
+    id: "evaluate",
+    label: "Evaluate",
+    sublabel: "Score & rank",
+    icon: "⚖️",
+    Scene: EvaluateScene,
+    accent: "teal",
+  },
+  {
+    id: "assemble",
+    label: "Assemble",
+    sublabel: "Code generation",
+    icon: "⚙️",
+    Scene: AssembleScene,
+    accent: "green",
+  },
+  {
+    id: "deliver",
+    label: "Download",
+    sublabel: "Zip + file preview",
+    icon: "📦",
+    Scene: DeliverScene,
+    accent: "amber",
+  },
+] as const;
+
+const ACCENT_COLORS: Record<string, string> = {
+  blue:   "border-blue-500/50 text-blue-400 bg-blue-500/10",
+  violet: "border-violet-500/50 text-violet-400 bg-violet-500/10",
+  cyan:   "border-cyan-500/50 text-cyan-400 bg-cyan-500/10",
+  teal:   "border-teal-500/50 text-teal-400 bg-teal-500/10",
+  green:  "border-green-500/50 text-green-400 bg-green-500/10",
+  amber:  "border-amber-500/50 text-amber-400 bg-amber-500/10",
+};
+
+const ACCENT_BAR: Record<string, string> = {
+  blue:   "from-blue-500 to-cyan-400",
+  violet: "from-violet-500 to-purple-400",
+  cyan:   "from-cyan-500 to-teal-400",
+  teal:   "from-teal-500 to-cyan-400",
+  green:  "from-green-500 to-emerald-400",
+  amber:  "from-amber-500 to-orange-400",
+};
+
+// ── Main player ───────────────────────────────────────────────────────────────
+
+export default function StepPlayer() {
+  const [current, setCurrent] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const playerRef = useRef<HTMLDivElement>(null);
+  const startTimeRef = useRef<number | null>(null);
+  const rafRef = useRef<number | null>(null);
+
+  const step = STEPS[current];
+
+  // ── Auto-play timer via rAF ──────────────────────────────────────────────
+  const tick = useCallback(() => {
+    if (startTimeRef.current === null) return;
+    const elapsed = Date.now() - startTimeRef.current;
+    const p = Math.min(elapsed / STEP_DURATION, 1);
+    setProgress(p);
+
+    if (p >= 1) {
+      setCurrent((c) => {
+        if (c < STEPS.length - 1) {
+          startTimeRef.current = Date.now();
+          return c + 1;
+        }
+        // End of steps
+        setPlaying(false);
+        startTimeRef.current = null;
+        return c;
+      });
+      setProgress(0);
+    } else {
+      rafRef.current = requestAnimationFrame(tick);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (playing) {
+      startTimeRef.current = Date.now() - progress * STEP_DURATION;
+      rafRef.current = requestAnimationFrame(tick);
+    } else {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    }
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing, tick]);
+
+  // ── Auto-start when scrolled into view ──────────────────────────────────
+  useEffect(() => {
+    const el = playerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !playing) {
+          setPlaying(true);
+        }
+      },
+      { threshold: 0.35 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const goTo = (i: number) => {
+    setCurrent(i);
+    setProgress(0);
+    startTimeRef.current = Date.now();
+    setPlaying(true);
+  };
+
+  const togglePlay = () => {
+    if (playing) {
+      setPlaying(false);
+    } else {
+      if (current === STEPS.length - 1 && progress >= 1) {
+        goTo(0);
+      } else {
+        setPlaying(true);
+      }
+    }
+  };
+
+  const { Scene } = step;
+
+  return (
+    <div
+      ref={playerRef}
+      className="rounded-2xl border border-white/8 bg-[#0b0b18] overflow-hidden shadow-2xl"
+    >
+      {/* ── Step tabs ── */}
+      <div className="flex border-b border-white/5 overflow-x-auto scrollbar-none">
+        {STEPS.map((s, i) => {
+          const isActive = i === current;
+          const isDone   = i < current;
+          return (
+            <button
+              key={s.id}
+              onClick={() => goTo(i)}
+              className={`flex-1 min-w-[80px] flex flex-col items-center gap-1 px-3 py-3 text-center transition-all duration-200 border-b-2 ${
+                isActive
+                  ? `${ACCENT_COLORS[s.accent]} border-current`
+                  : isDone
+                  ? "text-gray-400 border-transparent bg-white/[0.01] hover:bg-white/[0.03]"
+                  : "text-gray-600 border-transparent hover:text-gray-400 hover:bg-white/[0.02]"
+              }`}
+            >
+              <span className="text-base leading-none">
+                {isDone ? "✓" : s.icon}
+              </span>
+              <span className="text-[10px] font-semibold leading-none hidden sm:block">{s.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Scene viewport ── */}
+      <div className="relative h-[340px] overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={current}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-0"
+          >
+            <Scene active={playing || progress > 0} />
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* ── Controls ── */}
+      <div className="border-t border-white/5 px-5 py-3 flex items-center gap-4">
+        {/* Play/Pause */}
+        <button
+          onClick={togglePlay}
+          className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-sm transition-all shrink-0"
+          aria-label={playing ? "Pause" : "Play"}
+        >
+          {playing ? "⏸" : "▶"}
+        </button>
+
+        {/* Step label */}
+        <div className="shrink-0 hidden sm:block">
+          <div className="text-xs font-semibold text-white leading-none">{step.label}</div>
+          <div className="text-[10px] text-gray-500 font-mono">{step.sublabel}</div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="flex-1 h-1 rounded-full bg-white/5 overflow-hidden">
+          <motion.div
+            className={`h-full rounded-full bg-gradient-to-r ${ACCENT_BAR[step.accent]}`}
+            style={{ width: `${progress * 100}%` }}
+          />
+        </div>
+
+        {/* Step counter */}
+        <div className="text-[11px] text-gray-500 font-mono shrink-0">
+          {current + 1} / {STEPS.length}
+        </div>
+
+        {/* Prev / Next */}
+        <div className="flex gap-1 shrink-0">
+          <button
+            onClick={() => goTo(Math.max(0, current - 1))}
+            disabled={current === 0}
+            className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-xs text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            ‹
+          </button>
+          <button
+            onClick={() => goTo(Math.min(STEPS.length - 1, current + 1))}
+            disabled={current === STEPS.length - 1}
+            className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-xs text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            ›
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
