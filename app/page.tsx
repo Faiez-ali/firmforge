@@ -6,6 +6,7 @@ import { useRef } from "react";
 import McuShowcase from "@/components/mcu/McuShowcase";
 import CircuitBg from "@/components/hero/CircuitBg";
 import StepPlayer from "@/components/how-it-works/StepPlayer";
+import IdeaTicker from "@/components/hero/IdeaTicker";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -58,8 +59,6 @@ const PLANS = [
     highlight: false,
   },
 ];
-
-const MCUS = ["STM32", "ESP32", "RP2040", "nRF52", "AVR", "SAME5x"];
 
 export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -178,72 +177,16 @@ export default function Home() {
             </Link>
           </motion.div>
 
-          {/* MCU chips */}
-          <motion.div
-            variants={fadeUp} initial="hidden" animate="show" custom={4}
-            className="flex items-center justify-center gap-3 flex-wrap"
-          >
-            <span className="text-sm text-gray-500">Supports</span>
-            {MCUS.map((mcu, i) => (
-              <motion.span
-                key={mcu}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + i * 0.06, duration: 0.3 }}
-                className="px-3 py-1 rounded-full bg-white/5 border border-white/10 hover:border-blue-500/40 hover:bg-blue-500/10 text-sm text-gray-300 font-mono transition-all duration-200 cursor-default"
-              >
-                {mcu}
-              </motion.span>
-            ))}
-          </motion.div>
         </motion.div>
 
-        {/* Floating terminal card */}
+        {/* Idea ticker — random 10 per tab, seamless scroll */}
         <motion.div
-          initial={{ opacity: 0, y: 40, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ delay: 0.8, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="relative mt-20 max-w-2xl w-full mx-auto z-20"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7, duration: 0.8 }}
+          className="relative z-10 w-full"
         >
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 blur-xl" />
-          <div className="relative rounded-2xl border border-white/10 bg-[#0d0d1a]/90 backdrop-blur-xl overflow-hidden shadow-2xl">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
-              <div className="w-3 h-3 rounded-full bg-red-500/70" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
-              <div className="w-3 h-3 rounded-full bg-green-500/70" />
-              <span className="ml-2 text-xs text-gray-500 font-mono">firmforge — agent pipeline</span>
-            </div>
-            <div className="p-5 font-mono text-sm space-y-2">
-              {[
-                { label: "intake", color: "text-blue-400", msg: "Project spec locked — STM32F4 + BME280 + SSD1306" },
-                { label: "discover", color: "text-violet-400", msg: "Found 14 candidates across GitHub + PlatformIO" },
-                { label: "evaluate", color: "text-cyan-400", msg: "adafruit/Adafruit_BME280 scored 94/100 ✓" },
-                { label: "assemble", color: "text-green-400", msg: "Generating driver + HAL + main.c layers..." },
-                { label: "deliver", color: "text-amber-400", msg: "firmware_stm32f4_weather.zip ready (47 files)" },
-              ].map((line, i) => (
-                <motion.div
-                  key={line.label}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 1.1 + i * 0.15, duration: 0.4 }}
-                  className="flex items-start gap-3"
-                >
-                  <span className={`${line.color} shrink-0`}>[{line.label}]</span>
-                  <span className="text-gray-300">{line.msg}</span>
-                </motion.div>
-              ))}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.9, duration: 0.3 }}
-                className="flex items-center gap-2 pt-1"
-              >
-                <span className="text-green-400">✓</span>
-                <span className="text-green-400 font-semibold">Pipeline complete in 38s</span>
-                <span className="w-2 h-4 bg-green-400 animate-pulse ml-1" />
-              </motion.div>
-            </div>
-          </div>
+          <IdeaTicker />
         </motion.div>
       </section>
 
