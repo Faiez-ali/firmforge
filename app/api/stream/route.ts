@@ -8,13 +8,23 @@ import {
   generateReadme,
 } from "@/lib/agents/assemble";
 import { packageAndDeliver } from "@/lib/agents/deliver";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import type { ProjectSpec, BOM } from "@/types";
 
 export const maxDuration = 300; // 5 min timeout on Vercel Pro
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  // Verify the user is authenticated before starting the pipeline
+  const supabaseAuth = await createClient();
+  const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+  if (authError || !user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const { projectId, spec, bom }: { projectId: string; spec: ProjectSpec; bom: BOM } =
     await req.json();
 

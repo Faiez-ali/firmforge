@@ -87,10 +87,11 @@ export default function GeneratePage() {
           />
         )}
 
-        {stage === "generating" && projectId && (
+        {stage === "generating" && projectId && bom && (
           <GenerationProgress
             projectId={projectId}
             spec={spec as ProjectSpec}
+            bom={bom}
             onComplete={handleGenerationComplete}
           />
         )}
