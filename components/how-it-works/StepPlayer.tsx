@@ -569,6 +569,10 @@ export default function StepPlayer() {
   const playerRef = useRef<HTMLDivElement>(null);
   const startTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
+  // Mirror current into a ref so tick() always reads the live value
+  // without needing it in useCallback's dependency array.
+  const currentRef = useRef(0);
+  currentRef.current = current;
 
   const step = STEPS[current];
 
@@ -580,17 +584,17 @@ export default function StepPlayer() {
     setProgress(p);
 
     if (p >= 1) {
-      setCurrent((c) => {
-        if (c < STEPS.length - 1) {
-          startTimeRef.current = Date.now();
-          return c + 1;
-        }
-        // End of steps
+      if (currentRef.current < STEPS.length - 1) {
+        // Advance to next step and keep the loop running
+        setCurrent((c) => c + 1);
+        setProgress(0);
+        startTimeRef.current = Date.now();
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        // Reached the last step — stop
         setPlaying(false);
         startTimeRef.current = null;
-        return c;
-      });
-      setProgress(0);
+      }
     } else {
       rafRef.current = requestAnimationFrame(tick);
     }
