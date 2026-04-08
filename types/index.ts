@@ -8,10 +8,12 @@
 export type MCUFamily =
   | "STM32"
   | "ESP32"
-  | "RP2040"
+  | "RP2040"     // Raspberry Pi Pico (original)
+  | "RP2350"     // Raspberry Pi Pico 2
   | "nRF52"
-  | "AVR"
+  | "AVR"        // AVR / Arduino Uno, Mega, Nano
   | "SAME5x"
+  | "RPiLinux"   // Raspberry Pi 4/5/Zero 2W — Linux GPIO projects
   | "custom";
 
 export type BuildSystem = "cmake" | "platformio" | "arduino" | "espidf";

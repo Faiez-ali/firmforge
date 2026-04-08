@@ -146,11 +146,15 @@ CMSIS / Vendor SDK    Startup, linker scripts             Always vendor-sourced,
 ## MCU and RTOS scope
 
 **Launch (full support):** STM32, ESP32
-**Launch (experimental):** RP2040, nRF52, AVR, SAME5x
+**Launch (experimental):** RP2040, RP2350 (Pico 2), nRF52, AVR / Arduino boards, SAME5x
+**Launch (Linux GPIO):** RPiLinux — Raspberry Pi 4/5/Zero 2W (libgpiod + pigpio, CMake, no RTOS)
 **RTOS launch:** bare-metal + FreeRTOS
 **RTOS v1.1:** Zephyr
-**Build systems launch:** CMake + PlatformIO
-**Build systems v1.1:** Arduino IDE
+**Build systems launch:** CMake + PlatformIO + Arduino IDE (AVR/ESP32/RP2040/RP2350/STM32 only)
+**Build systems v1.1:** ESP-IDF direct
+
+**Arduino IDE constraints:** AVR/ESP32/RP2040/RP2350/STM32 only · auto-locks RTOS to none · generates setup()/loop()
+**RPiLinux constraints:** CMake only · no RTOS · discovery always injects libgpiod + pigpio · Linux userspace C/C++
 
 ---
 

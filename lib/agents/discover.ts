@@ -305,9 +305,39 @@ const CURATED_LIBRARY: Record<string, LibraryCandidate[]> = {
       license: "MIT",
       stars: 4100,
       lastCommit: "2024-11-01",
-      mcuCompatibility: ["STM32", "ESP32", "RP2040", "nRF52", "AVR", "SAME5x"],
+      mcuCompatibility: ["STM32", "ESP32", "RP2040", "RP2350", "nRF52", "AVR", "SAME5x"],
       forComponent: "FreeRTOS",
       cloneUrl: "https://github.com/FreeRTOS/FreeRTOS-Kernel.git",
+    },
+  ],
+
+  // ── Raspberry Pi Linux GPIO ───────────────────────────────────────────────
+  "GPIO": [
+    {
+      id: "curated-libgpiod",
+      name: "brgl/libgpiod",
+      description: "libgpiod — modern Linux GPIO character device library. Recommended for RPi 4/5/Zero 2W. Replaces deprecated sysfs GPIO.",
+      url: "https://github.com/brgl/libgpiod",
+      source: "curated",
+      license: "LGPL-2.1",
+      stars: 870,
+      lastCommit: "2024-10-20",
+      mcuCompatibility: ["RPiLinux"],
+      forComponent: "GPIO",
+      cloneUrl: "https://github.com/brgl/libgpiod.git",
+    },
+    {
+      id: "curated-pigpio",
+      name: "joan2937/pigpio",
+      description: "pigpio — low-level Raspberry Pi GPIO with hardware PWM, SPI, I2C, UART. Requires pigpiod daemon.",
+      url: "https://github.com/joan2937/pigpio",
+      source: "curated",
+      license: "Unlicense",
+      stars: 2800,
+      lastCommit: "2024-08-15",
+      mcuCompatibility: ["RPiLinux"],
+      forComponent: "GPIO",
+      cloneUrl: "https://github.com/joan2937/pigpio.git",
     },
   ],
 
@@ -322,7 +352,7 @@ const CURATED_LIBRARY: Record<string, LibraryCandidate[]> = {
       license: "BSD-3-Clause",
       stars: 3100,
       lastCommit: "2024-10-05",
-      mcuCompatibility: ["STM32", "ESP32", "RP2040", "SAME5x"],
+      mcuCompatibility: ["STM32", "ESP32", "RP2040", "RP2350", "SAME5x"],
       forComponent: "LwIP",
       cloneUrl: "https://github.com/lwip-tcpip/lwip.git",
     },
@@ -342,12 +372,14 @@ export async function discoverLibraries(
   const results: LibraryCandidate[] = [];
   const componentsToSearch: string[] = [];
 
-  // Build search list: components + RTOS if needed
+  // Build search list: components + RTOS + platform libs
   for (const component of spec.components ?? []) {
     componentsToSearch.push(component.name);
   }
   if (spec.rtos === "freertos") componentsToSearch.push("FreeRTOS");
   // Zephyr is v1.1 — not yet supported, disabled in UI
+  // RPiLinux always needs GPIO library
+  if (spec.mcu === "RPiLinux") componentsToSearch.push("GPIO");
 
   for (const componentName of componentsToSearch) {
     onProgress?.(`Searching for ${componentName} drivers...`);

@@ -4,14 +4,22 @@ import { useState, useRef, useEffect } from "react";
 import type { ProjectSpec, MCUFamily, BuildSystem, RTOSType, Interface } from "@/types";
 
 const MCU_OPTIONS: { value: MCUFamily; label: string; badge: string }[] = [
-  { value: "STM32", label: "STM32", badge: "Professional" },
-  { value: "ESP32", label: "ESP32", badge: "WiFi/BLE" },
-  { value: "RP2040", label: "RP2040", badge: "Raspberry Pi" },
-  { value: "nRF52", label: "nRF52", badge: "BLE" },
-  { value: "AVR", label: "AVR", badge: "Classic" },
-  { value: "SAME5x", label: "SAME5x", badge: "Industrial" },
-  { value: "custom", label: "Suggest for me", badge: "AI picks" },
+  { value: "STM32",    label: "STM32",          badge: "Professional"  },
+  { value: "ESP32",    label: "ESP32",           badge: "WiFi / BLE"   },
+  { value: "RP2040",   label: "Pico / RP2040",  badge: "RPi Pico"     },
+  { value: "RP2350",   label: "Pico 2 / RP2350",badge: "RPi Pico 2"   },
+  { value: "nRF52",    label: "nRF52",           badge: "BLE"          },
+  { value: "AVR",      label: "AVR / Arduino",  badge: "Uno · Mega"   },
+  { value: "SAME5x",   label: "SAME5x",          badge: "Industrial"   },
+  { value: "RPiLinux", label: "Raspberry Pi",    badge: "Linux GPIO"   },
+  { value: "custom",   label: "Suggest for me",  badge: "AI picks"     },
 ];
+
+// MCUs that support Arduino IDE as a build system
+const ARDUINO_COMPATIBLE: MCUFamily[] = ["AVR", "ESP32", "RP2040", "RP2350", "STM32"];
+
+// MCUs that run Linux — no vendor SDK, no RTOS, CMake only
+const LINUX_MCUS: MCUFamily[] = ["RPiLinux"];
 
 const INTERFACE_OPTIONS: { value: Interface; label: string }[] = [
   { value: "uart", label: "UART" },
@@ -54,7 +62,24 @@ export default function IntakeWizard({ initialSpec, onComplete }: Props) {
   const [loadingHint, setLoadingHint] = useState(false);
 
   function update<K extends keyof ProjectSpec>(key: K, value: ProjectSpec[K]) {
-    setSpec((prev) => ({ ...prev, [key]: value }));
+    setSpec((prev) => {
+      const next = { ...prev, [key]: value };
+      // When MCU changes, enforce build system + RTOS compatibility
+      if (key === "mcu") {
+        const mcu = value as MCUFamily;
+        if (LINUX_MCUS.includes(mcu)) {
+          next.buildSystem = "cmake";
+          next.rtos = "none";
+        } else if (!ARDUINO_COMPATIBLE.includes(mcu) && next.buildSystem === "arduino") {
+          next.buildSystem = "cmake";
+        }
+      }
+      // When Arduino IDE selected, lock RTOS to none
+      if (key === "buildSystem" && value === "arduino") {
+        next.rtos = "none";
+      }
+      return next;
+    });
   }
 
   function toggleInterface(iface: Interface) {
@@ -237,7 +262,7 @@ export default function IntakeWizard({ initialSpec, onComplete }: Props) {
 
           <div>
             <label className="text-sm text-gray-400 mb-3 block">MCU family</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {MCU_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
@@ -317,45 +342,88 @@ export default function IntakeWizard({ initialSpec, onComplete }: Props) {
             <p className="text-gray-400 text-sm">RTOS, real-time needs, and build system.</p>
           </div>
 
-          <div>
-            <label className="text-sm text-gray-400 mb-3 block">RTOS</label>
-            <div className="grid grid-cols-3 gap-3">
-              {RTOS_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => opt.value !== "zephyr" && update("rtos", opt.value)}
-                  disabled={opt.value === "zephyr"}
-                  className={`p-3 rounded-xl border text-center transition-all ${
-                    spec.rtos === opt.value
-                      ? "border-brand-500/50 bg-brand-500/10"
-                      : opt.value === "zephyr"
-                      ? "border-white/5 opacity-40 cursor-not-allowed"
-                      : "border-white/5 bg-white/[0.02] hover:border-white/10"
-                  }`}
-                >
-                  <div className="font-medium text-sm">{opt.label}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">{opt.desc}</div>
-                </button>
-              ))}
+          {/* RPiLinux banner — no vendor SDK, Linux handles scheduling */}
+          {LINUX_MCUS.includes(spec.mcu as MCUFamily) && (
+            <div className="p-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 text-xs text-cyan-300">
+              Raspberry Pi runs Linux — no bare-metal RTOS or vendor SDK needed.
+              FirmForge generates C/C++ with <span className="font-mono">libgpiod</span> / <span className="font-mono">pigpio</span> and a CMake project.
             </div>
-          </div>
+          )}
+
+          {/* RTOS — hidden for Linux, locked to "none" for Arduino IDE */}
+          {!LINUX_MCUS.includes(spec.mcu as MCUFamily) && (
+            <div>
+              <label className="text-sm text-gray-400 mb-3 block">RTOS</label>
+              {spec.buildSystem === "arduino" && (
+                <p className="text-xs text-amber-400/80 mb-2">
+                  Arduino IDE uses its own <span className="font-mono">setup()</span> / <span className="font-mono">loop()</span> — RTOS is not applicable.
+                </p>
+              )}
+              <div className="grid grid-cols-3 gap-3">
+                {RTOS_OPTIONS.map((opt) => {
+                  const lockedByArduino = spec.buildSystem === "arduino" && opt.value !== "none";
+                  const isZephyr = opt.value === "zephyr";
+                  const disabled = lockedByArduino || isZephyr;
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => !disabled && update("rtos", opt.value)}
+                      disabled={disabled}
+                      className={`p-3 rounded-xl border text-center transition-all ${
+                        spec.rtos === opt.value
+                          ? "border-brand-500/50 bg-brand-500/10"
+                          : disabled
+                          ? "border-white/5 opacity-40 cursor-not-allowed"
+                          : "border-white/5 bg-white/[0.02] hover:border-white/10"
+                      }`}
+                    >
+                      <div className="font-medium text-sm">{opt.label}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        {isZephyr ? "v1.1" : lockedByArduino ? "n/a with Arduino" : opt.desc}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="text-sm text-gray-400 mb-3 block">Build system</label>
+            {spec.mcu && !ARDUINO_COMPATIBLE.includes(spec.mcu as MCUFamily) && spec.buildSystem === "arduino" && (
+              <p className="text-xs text-amber-400/80 mb-2">
+                Arduino IDE is not supported for {spec.mcu} — switching to CMake.
+              </p>
+            )}
             <div className="flex gap-2 flex-wrap">
-              {BUILD_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => update("buildSystem", opt.value)}
-                  className={`px-4 py-2 rounded-lg border text-sm font-mono transition-all ${
-                    spec.buildSystem === opt.value
-                      ? "border-brand-500/50 bg-brand-500/10 text-brand-300"
-                      : "border-white/5 bg-white/[0.02] text-gray-400 hover:border-white/10"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
+              {BUILD_OPTIONS.map((opt) => {
+                // Arduino IDE only available for compatible MCUs
+                const arduinoLocked =
+                  opt.value === "arduino" &&
+                  spec.mcu &&
+                  !ARDUINO_COMPATIBLE.includes(spec.mcu as MCUFamily);
+                // RPiLinux: only CMake makes sense
+                const linuxLocked =
+                  LINUX_MCUS.includes(spec.mcu as MCUFamily) &&
+                  opt.value !== "cmake";
+                const disabled = arduinoLocked || linuxLocked;
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => !disabled && update("buildSystem", opt.value)}
+                    disabled={!!disabled}
+                    className={`px-4 py-2 rounded-lg border text-sm font-mono transition-all ${
+                      spec.buildSystem === opt.value
+                        ? "border-brand-500/50 bg-brand-500/10 text-brand-300"
+                        : disabled
+                        ? "border-white/5 text-gray-700 cursor-not-allowed opacity-40"
+                        : "border-white/5 bg-white/[0.02] text-gray-400 hover:border-white/10"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
