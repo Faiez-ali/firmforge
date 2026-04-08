@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { useRef, useState } from "react";
 import McuShowcase from "@/components/mcu/McuShowcase";
 
 const fadeUp = {
@@ -109,6 +109,7 @@ export default function Home() {
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <main className="min-h-screen bg-[#060610] text-white overflow-x-hidden">
@@ -127,7 +128,8 @@ export default function Home() {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="sticky top-0 z-50 border-b border-white/5 backdrop-blur-xl bg-[#060610]/80 px-6 py-4"
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
             <span className="text-lg font-bold tracking-tight">
               Firm<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Forge</span>
@@ -136,16 +138,13 @@ export default function Home() {
               beta
             </span>
           </Link>
-          <div className="flex items-center gap-6 text-sm text-gray-400">
-            <Link href="#features" className="hover:text-white transition-colors hidden md:block">Features</Link>
-            <Link href="#pricing" className="hover:text-white transition-colors hidden md:block">Pricing</Link>
-            <Link href="/about" className="hover:text-white transition-colors hidden md:block">About</Link>
-            <Link
-              href="/auth/login"
-              className="hover:text-white transition-colors"
-            >
-              Sign in
-            </Link>
+
+          {/* Desktop links */}
+          <div className="hidden md:flex items-center gap-6 text-sm text-gray-400">
+            <Link href="#features" className="hover:text-white transition-colors">Features</Link>
+            <Link href="#pricing"  className="hover:text-white transition-colors">Pricing</Link>
+            <Link href="/about"    className="hover:text-white transition-colors">About</Link>
+            <Link href="/auth/login" className="hover:text-white transition-colors">Sign in</Link>
             <Link
               href="/dashboard/generate"
               className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 text-white text-sm font-medium transition-all duration-300 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40"
@@ -153,7 +152,68 @@ export default function Home() {
               Start building
             </Link>
           </div>
+
+          {/* Mobile: Sign in + hamburger */}
+          <div className="flex md:hidden items-center gap-3">
+            <Link href="/auth/login" className="text-sm text-gray-400 hover:text-white transition-colors">
+              Sign in
+            </Link>
+            <button
+              onClick={() => setMobileMenuOpen((o) => !o)}
+              className="w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="3" y1="3" x2="15" y2="15"/><line x1="15" y1="3" x2="3" y2="15"/>
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                  <line x1="2" y1="4.5" x2="16" y2="4.5"/>
+                  <line x1="2" y1="9"   x2="16" y2="9"/>
+                  <line x1="2" y1="13.5" x2="16" y2="13.5"/>
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile dropdown */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="md:hidden overflow-hidden"
+            >
+              <div className="flex flex-col gap-1 pt-3 pb-1 border-t border-white/5 mt-3">
+                {[
+                  { href: "#features", label: "Features" },
+                  { href: "#pricing",  label: "Pricing"  },
+                  { href: "/about",    label: "About"    },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="px-2 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                <Link
+                  href="/dashboard/generate"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="mt-1 px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold text-center"
+                >
+                  Start building →
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.nav>
 
       {/* ── Hero ── */}
@@ -170,7 +230,7 @@ export default function Home() {
 
           <motion.h1
             variants={fadeUp} initial="hidden" animate="show" custom={1}
-            className="text-6xl md:text-8xl font-bold tracking-tight mb-6 leading-[1.05]"
+            className="text-4xl sm:text-6xl md:text-8xl font-bold tracking-tight mb-6 leading-[1.05]"
           >
             Firmware projects,
             <br />
@@ -181,7 +241,7 @@ export default function Home() {
 
           <motion.p
             variants={fadeUp} initial="hidden" animate="show" custom={2}
-            className="text-xl text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed"
+            className="text-base sm:text-xl text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed px-2 sm:px-0"
           >
             Describe what your embedded device does. FirmForge searches the open-source
             ecosystem, selects the best drivers, and assembles a complete layered codebase —
@@ -194,14 +254,14 @@ export default function Home() {
           >
             <Link
               href="/dashboard/generate"
-              className="group px-8 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold text-lg transition-all duration-300 shadow-xl shadow-blue-500/25 hover:shadow-blue-500/50 hover:scale-105 flex items-center gap-2"
+              className="group px-6 py-3 sm:px-8 sm:py-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold text-base sm:text-lg transition-all duration-300 shadow-xl shadow-blue-500/25 hover:shadow-blue-500/50 hover:scale-105 flex items-center gap-2"
             >
               Generate your project
               <span className="group-hover:translate-x-1 transition-transform duration-200">→</span>
             </Link>
             <Link
               href="#features"
-              className="px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-lg transition-all duration-300 border border-white/10 hover:border-white/20 backdrop-blur-sm"
+              className="px-6 py-3 sm:px-8 sm:py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-base sm:text-lg transition-all duration-300 border border-white/10 hover:border-white/20 backdrop-blur-sm"
             >
               See how it works
             </Link>
@@ -395,7 +455,7 @@ export default function Home() {
                 transition={{ delay: i * 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className={`relative rounded-2xl p-6 border transition-all duration-300 ${
                   plan.highlight
-                    ? "border-blue-500/50 bg-gradient-to-b from-blue-500/10 to-transparent scale-105 shadow-2xl shadow-blue-500/10"
+                    ? "border-blue-500/50 bg-gradient-to-b from-blue-500/10 to-transparent md:scale-105 shadow-2xl shadow-blue-500/10"
                     : "border-white/5 bg-white/[0.02] hover:border-white/10"
                 }`}
               >

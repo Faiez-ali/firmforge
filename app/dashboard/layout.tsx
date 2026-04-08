@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { MobileNav } from "./MobileNav";
 
 export default async function DashboardLayout({
   children,
@@ -12,7 +13,6 @@ export default async function DashboardLayout({
 
   if (!user) redirect("/auth/login");
 
-  // Fetch profile for plan badge and name
   const { data: profile } = await supabase
     .from("profiles")
     .select("name, plan, generations_this_month, credits")
@@ -24,21 +24,19 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex">
-      {/* Sidebar */}
-      <aside className="w-56 border-r border-white/5 flex flex-col py-5 px-3 flex-shrink-0">
-        {/* Logo */}
+
+      {/* ── Desktop sidebar (lg+) ── */}
+      <aside className="hidden lg:flex w-56 border-r border-white/5 flex-col py-5 px-3 flex-shrink-0">
         <Link href="/" className="px-3 mb-6 text-base font-semibold tracking-tight">
           Firm<span className="text-brand-400">Forge</span>
         </Link>
 
-        {/* Nav */}
         <nav className="flex flex-col gap-0.5 flex-1">
           <NavItem href="/dashboard/generate" icon="⚡">New project</NavItem>
-          <NavItem href="/dashboard/projects" icon="📁">My projects</NavItem>
-          <NavItem href="/dashboard/settings" icon="⚙">Settings</NavItem>
+          <NavItem href="/dashboard/projects"  icon="📁">My projects</NavItem>
+          <NavItem href="/dashboard/settings"  icon="⚙">Settings</NavItem>
         </nav>
 
-        {/* User info */}
         <div className="border-t border-white/5 pt-4 px-2">
           <div className="flex items-center gap-2.5 mb-3">
             <div className="w-7 h-7 rounded-full bg-brand-500/20 flex items-center justify-center text-xs font-medium text-brand-400">
@@ -48,9 +46,9 @@ export default async function DashboardLayout({
               <div className="text-xs font-medium truncate">{displayName}</div>
               <div className="flex items-center gap-1 mt-0.5">
                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                  plan === "pro" ? "bg-brand-500/20 text-brand-400" :
+                  plan === "pro"  ? "bg-brand-500/20 text-brand-400"   :
                   plan === "team" ? "bg-purple-500/20 text-purple-400" :
-                  "bg-white/5 text-gray-500"
+                                    "bg-white/5 text-gray-500"
                 }`}>
                   {plan}
                 </span>
@@ -68,10 +66,15 @@ export default async function DashboardLayout({
         </div>
       </aside>
 
-      {/* Main */}
-      <main className="flex-1 overflow-auto">
+      {/* ── Mobile header + slide-out drawer ── */}
+      <MobileNav displayName={displayName} plan={plan} />
+
+      {/* ── Main content ── */}
+      {/* pt-14 offsets the fixed mobile top bar; lg:pt-0 removes it on desktop */}
+      <main className="flex-1 min-w-0 overflow-auto pt-14 lg:pt-0">
         {children}
       </main>
+
     </div>
   );
 }

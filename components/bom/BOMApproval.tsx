@@ -20,34 +20,38 @@ export default function BOMApproval({ bom, spec, onApprove, onBack }: Props) {
         </p>
       </div>
 
-      {/* BOM table */}
+      {/* BOM table — scrollable on mobile */}
       <div className="border border-white/10 rounded-xl overflow-hidden mb-6">
-        <div className="grid grid-cols-12 text-xs text-gray-500 font-mono px-4 py-2.5 bg-white/[0.02] border-b border-white/5">
-          <div className="col-span-4">Component</div>
-          <div className="col-span-3">Description</div>
-          <div className="col-span-2 text-center">Qty</div>
-          <div className="col-span-2 text-right">Unit price</div>
-          <div className="col-span-1 text-right">Total</div>
-        </div>
-        {bom.items.map((item, i) => (
-          <div
-            key={i}
-            className="grid grid-cols-12 px-4 py-3 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors text-sm"
-          >
-            <div className="col-span-4 font-mono text-brand-300 font-medium">{item.name}</div>
-            <div className="col-span-3 text-gray-400 text-xs self-center">{item.description}</div>
-            <div className="col-span-2 text-center text-gray-300">{item.quantity}</div>
-            <div className="col-span-2 text-right text-gray-300">
-              {item.lcscPrice
-                ? <span className="text-green-400">${item.lcscPrice.toFixed(2)}</span>
-                : <span className="text-gray-500">~${item.estimatedUnitPrice.toFixed(2)}</span>
-              }
+        <div className="overflow-x-auto">
+          <div className="min-w-[540px]">
+            <div className="grid grid-cols-12 text-xs text-gray-500 font-mono px-4 py-2.5 bg-white/[0.02] border-b border-white/5">
+              <div className="col-span-4">Component</div>
+              <div className="col-span-3">Description</div>
+              <div className="col-span-2 text-center">Qty</div>
+              <div className="col-span-2 text-right">Unit price</div>
+              <div className="col-span-1 text-right">Total</div>
             </div>
-            <div className="col-span-1 text-right text-gray-400 text-xs">
-              ${((item.lcscPrice ?? item.estimatedUnitPrice) * item.quantity).toFixed(2)}
-            </div>
+            {bom.items.map((item, i) => (
+              <div
+                key={i}
+                className="grid grid-cols-12 px-4 py-3 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors text-sm"
+              >
+                <div className="col-span-4 font-mono text-brand-300 font-medium">{item.name}</div>
+                <div className="col-span-3 text-gray-400 text-xs self-center">{item.description}</div>
+                <div className="col-span-2 text-center text-gray-300">{item.quantity}</div>
+                <div className="col-span-2 text-right text-gray-300">
+                  {item.lcscPrice
+                    ? <span className="text-green-400">${item.lcscPrice.toFixed(2)}</span>
+                    : <span className="text-gray-500">~${item.estimatedUnitPrice.toFixed(2)}</span>
+                  }
+                </div>
+                <div className="col-span-1 text-right text-gray-400 text-xs">
+                  ${((item.lcscPrice ?? item.estimatedUnitPrice) * item.quantity).toFixed(2)}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
         <div className="flex justify-between items-center px-4 py-3 bg-white/[0.02] text-sm">
           <div className="text-gray-500">
             {bom.pricesFetchedAt
@@ -71,7 +75,7 @@ export default function BOMApproval({ bom, spec, onApprove, onBack }: Props) {
       {/* Project summary */}
       <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 mb-8">
         <div className="text-xs text-gray-500 font-mono mb-3">PROJECT SUMMARY</div>
-        <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
           <div className="flex justify-between">
             <span className="text-gray-500">MCU</span>
             <span className="font-mono text-brand-300">{spec.mcu} {spec.mcuModel ?? ""}</span>

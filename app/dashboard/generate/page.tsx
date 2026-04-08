@@ -62,15 +62,15 @@ export default function GeneratePage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       {/* Top bar */}
-      <div className="border-b border-white/5 px-6 py-4 flex items-center justify-between">
-        <a href="/" className="text-lg font-semibold tracking-tight">
+      <div className="border-b border-white/5 px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+        <a href="/" className="text-lg font-semibold tracking-tight shrink-0">
           Firm<span className="text-brand-400">Forge</span>
         </a>
         <StageIndicator current={stage} />
       </div>
 
       {/* Main content */}
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {stage === "intake" && (
           <IntakeWizard
             initialSpec={spec}
@@ -118,11 +118,11 @@ const STAGES: { key: Stage; label: string }[] = [
 function StageIndicator({ current }: { current: Stage }) {
   const currentIndex = STAGES.findIndex((s) => s.key === current);
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none">
       {STAGES.map((s, i) => (
-        <div key={s.key} className="flex items-center gap-2">
+        <div key={s.key} className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <div
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition-all ${
               i < currentIndex
                 ? "bg-green-500/10 text-green-400"
                 : i === currentIndex
@@ -131,10 +131,12 @@ function StageIndicator({ current }: { current: Stage }) {
             }`}
           >
             {i < currentIndex && <span>✓</span>}
-            {s.label}
+            {/* Show short labels on mobile */}
+            <span className="hidden sm:inline">{s.label}</span>
+            <span className="sm:hidden">{i < currentIndex ? "" : i === currentIndex ? s.label : `${i + 1}`}</span>
           </div>
           {i < STAGES.length - 1 && (
-            <span className="text-gray-700 text-xs">→</span>
+            <span className="text-gray-700 text-xs">›</span>
           )}
         </div>
       ))}

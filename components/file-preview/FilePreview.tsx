@@ -46,9 +46,9 @@ export default function FilePreview({ files, readme, downloadUrl }: Props) {
 
   return (
     <div className="animate-fade-in">
-      <div className="flex items-start justify-between mb-6 gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-6 gap-3 sm:gap-4">
         <div>
-          <h2 className="text-2xl font-bold mb-1 text-green-400">
+          <h2 className="text-xl sm:text-2xl font-bold mb-1 text-green-400">
             ✓ Project generated
           </h2>
           <p className="text-gray-400 text-sm">
@@ -59,7 +59,7 @@ export default function FilePreview({ files, readme, downloadUrl }: Props) {
         <a
           href={downloadUrl}
           download="firmware.zip"
-          className="flex-shrink-0 px-6 py-3 rounded-xl bg-green-500 hover:bg-green-400 text-white font-semibold text-sm transition-all hover:scale-105"
+          className="self-start sm:flex-shrink-0 px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-green-500 hover:bg-green-400 text-white font-semibold text-sm transition-all hover:scale-105"
         >
           ↓ Download .zip
         </a>
@@ -94,9 +94,9 @@ export default function FilePreview({ files, readme, downloadUrl }: Props) {
       )}
 
       {view === "files" && (
-        <div className="grid grid-cols-3 gap-0 border border-white/5 rounded-xl overflow-hidden">
+        <div className="flex flex-col sm:grid sm:grid-cols-3 gap-0 border border-white/5 rounded-xl overflow-hidden">
           {/* File tree */}
-          <div className="col-span-1 bg-gray-900/50 border-r border-white/5 overflow-y-auto max-h-[500px]">
+          <div className="sm:col-span-1 bg-gray-900/50 border-b sm:border-b-0 sm:border-r border-white/5 overflow-y-auto max-h-[220px] sm:max-h-[500px]">
             {Object.entries(grouped).map(([dir, dirFiles]) => (
               <div key={dir}>
                 <div className="px-3 py-1.5 text-xs text-gray-500 font-mono bg-white/[0.02] border-b border-white/5">
@@ -127,7 +127,7 @@ export default function FilePreview({ files, readme, downloadUrl }: Props) {
           </div>
 
           {/* Code viewer */}
-          <div className="col-span-2 bg-gray-950 overflow-auto max-h-[500px]">
+          <div className="sm:col-span-2 bg-gray-950 overflow-auto max-h-[360px] sm:max-h-[500px]">
             {selectedFile ? (
               <div>
                 <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 bg-gray-900/30">
