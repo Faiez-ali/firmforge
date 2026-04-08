@@ -7,6 +7,7 @@ import McuShowcase from "@/components/mcu/McuShowcase";
 import CircuitBg from "@/components/hero/CircuitBg";
 import StepPlayer from "@/components/how-it-works/StepPlayer";
 import IdeaTicker from "@/components/hero/IdeaTicker";
+import HwSwAnim from "@/components/cta/HwSwAnim";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -345,32 +346,89 @@ export default function Home() {
       </section>
 
       {/* ── CTA banner ── */}
-      <section className="relative z-10 px-6 py-24">
+      <section className="relative z-10 px-8 lg:px-16 py-24">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="max-w-3xl mx-auto text-center"
         >
-          <div className="relative rounded-3xl border border-blue-500/20 bg-gradient-to-b from-blue-500/10 to-violet-500/5 p-16 overflow-hidden">
+          <div className="relative rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-500/10 via-[#060610] to-violet-500/8 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-cyan-600/5 to-violet-600/5" />
-            <h2 className="relative text-4xl md:text-5xl font-bold mb-4">
-              Ready to build your<br />
-              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                next firmware project?
-              </span>
-            </h2>
-            <p className="relative text-gray-400 mb-10 text-lg">
-              Join engineers shipping embedded products faster with AI.
-            </p>
-            <Link
-              href="/dashboard/generate"
-              className="relative inline-flex items-center gap-2 px-10 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold text-lg transition-all duration-300 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105"
-            >
-              Start for free →
-            </Link>
+
+            <div className="relative flex flex-col lg:flex-row items-center gap-0">
+
+              {/* ── Left: copy + CTA ── */}
+              <div className="flex-none lg:w-[42%] px-12 py-16 flex flex-col items-start">
+                <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+                  Ready to build your<br />
+                  <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                    next firmware project?
+                  </span>
+                </h2>
+                <p className="text-gray-400 mb-10 text-lg leading-relaxed">
+                  Join engineers shipping embedded products faster with AI.
+                </p>
+                <Link
+                  href="/dashboard/generate"
+                  className="inline-flex items-center gap-2 px-10 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold text-lg transition-all duration-300 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105"
+                >
+                  Start for free →
+                </Link>
+              </div>
+
+              {/* ── Divider ── */}
+              <div className="hidden lg:block w-px self-stretch bg-white/5" />
+
+              {/* ── Right: hardware–software animation ── */}
+              <div className="flex-1 px-8 py-12 flex flex-col gap-3">
+                <p className="text-[10px] font-mono text-gray-600 tracking-widest uppercase">
+                  Live signal flow
+                </p>
+                <div className="w-full h-[190px]">
+                  <HwSwAnim />
+                </div>
+                <p className="text-[11px] text-gray-600 font-mono">
+                  Hardware peripherals ↔ STM32 MCU ↔ Layered firmware — generated in seconds.
+                </p>
+              </div>
+
+            </div>
           </div>
+        </motion.div>
+      </section>
+
+      {/* ── Consultation CTA ── */}
+      <section className="relative z-10 px-8 lg:px-16 py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col md:flex-row items-center justify-between gap-8 rounded-2xl border border-white/8 bg-white/[0.025] px-10 py-10"
+        >
+          {/* Left — copy */}
+          <div>
+            <p className="text-xs font-mono text-blue-400 tracking-widest uppercase mb-2">
+              Expert help
+            </p>
+            <h2 className="text-2xl md:text-3xl font-bold text-white leading-snug mb-2">
+              Want us to build your<br className="hidden md:block" /> project together?
+            </h2>
+            <p className="text-gray-400 text-sm max-w-md">
+              Book a 1-on-1 session with a firmware engineer. We&apos;ll scope
+              your hardware, walk through the generated code, and get your
+              device running faster.
+            </p>
+          </div>
+
+          {/* Right — CTA */}
+          <a
+            href="mailto:hello@firmforge.dev?subject=Consultation%20Request&body=Hi%2C%20I%27d%20like%20to%20book%20a%20consultation."
+            className="flex-none inline-flex items-center gap-2 px-8 py-3.5 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 hover:text-white font-semibold text-sm transition-all duration-300 whitespace-nowrap"
+          >
+            Book a consultation →
+          </a>
         </motion.div>
       </section>
 
