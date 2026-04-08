@@ -192,7 +192,7 @@ export default function Home() {
       </section>
 
       {/* ── How it works — interactive step player ── */}
-      <section id="features" className="relative z-10 px-6 py-32 max-w-5xl mx-auto">
+      <section id="features" className="relative z-10 px-8 lg:px-16 py-32">
         <motion.div
           initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}
           className="text-center mb-14"

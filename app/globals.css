@@ -85,6 +85,12 @@
     100% { background-position: 0% 50%; }
   }
 
+  /* Idea ticker — horizontal infinite marquee */
+  @keyframes ticker {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
   /* Terminal-style text */
   .terminal {
     font-family: var(--font-mono);

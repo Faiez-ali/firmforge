@@ -132,7 +132,10 @@ export default function IdeaTicker() {
       {/* Scrolling track — pause on hover */}
       <div className="overflow-hidden py-2">
         <div
-          className="flex gap-4 w-max animate-ticker hover:[animation-play-state:paused]"
+          className="flex gap-4 w-max"
+          style={{ animation: "ticker 32s linear infinite" }}
+          onMouseEnter={e => (e.currentTarget.style.animationPlayState = "paused")}
+          onMouseLeave={e => (e.currentTarget.style.animationPlayState = "running")}
         >
           {track.map((idea, i) => (
             <IdeaCard key={i} idea={idea} />
