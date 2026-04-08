@@ -80,9 +80,9 @@ export default function Home() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="sticky top-0 z-50 border-b border-white/5 backdrop-blur-xl bg-[#060610]/80 px-6 py-4"
+        className="sticky top-0 z-50 border-b border-white/5 backdrop-blur-xl bg-[#060610]/80 px-8 lg:px-16 py-4"
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="w-full flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
             <span className="text-lg font-bold tracking-tight">
               Firm<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Forge</span>
@@ -375,8 +375,8 @@ export default function Home() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="relative z-10 border-t border-white/5 px-6 py-10">
-        <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4 text-sm text-gray-500">
+      <footer className="relative z-10 border-t border-white/5 px-8 lg:px-16 py-10">
+        <div className="w-full flex items-center justify-between flex-wrap gap-4 text-sm text-gray-500">
           <span>
             Firm<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-semibold">Forge</span> © 2026
           </span>
