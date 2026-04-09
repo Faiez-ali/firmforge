@@ -137,7 +137,7 @@ export default function GenerationProgress({ projectId, spec, bom, onComplete }:
       </div>
 
       {/* Stage indicators */}
-      <div className="grid grid-cols-4 gap-2 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-8">
         {Object.entries(STEP_LABELS).map(([key, label]) => {
           const status = stepStatus[key];
           return (
@@ -156,7 +156,7 @@ export default function GenerationProgress({ projectId, spec, bom, onComplete }:
               <div className="text-lg mb-1">
                 {status === "done" ? "✓" : status === "running" ? "⟳" : status === "error" ? "✕" : "○"}
               </div>
-              <div className="text-xs text-gray-400">{label}</div>
+              <div className="text-xs text-gray-400 leading-tight">{label}</div>
             </div>
           );
         })}

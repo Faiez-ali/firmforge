@@ -147,13 +147,13 @@ export default function IntakeWizard({ initialSpec, onComplete }: Props) {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Step pills */}
-      <div className="flex items-center gap-2 mb-10 justify-center">
+      {/* Step pills — scrollable on very small screens */}
+      <div className="flex items-center gap-1.5 sm:gap-2 mb-10 justify-center overflow-x-auto scrollbar-none pb-0.5">
         {steps.map((s, i) => (
-          <div key={s.key} className="flex items-center gap-2">
+          <div key={s.key} className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={() => i <= stepIndex && setStep(s.key)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+              className={`px-3 py-1.5 sm:px-4 rounded-full text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                 i === stepIndex
                   ? "bg-brand-500 text-white"
                   : i < stepIndex
@@ -163,7 +163,7 @@ export default function IntakeWizard({ initialSpec, onComplete }: Props) {
             >
               {i < stepIndex ? "✓ " : ""}{s.label}
             </button>
-            {i < steps.length - 1 && <span className="text-gray-700">→</span>}
+            {i < steps.length - 1 && <span className="text-gray-700 text-xs">›</span>}
           </div>
         ))}
       </div>
@@ -185,7 +185,7 @@ export default function IntakeWizard({ initialSpec, onComplete }: Props) {
             onChange={(e) => update("description", e.target.value)}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
             {[
               { value: "product", label: "Building a product" },
               { value: "prototype", label: "Rapid prototype" },
@@ -195,7 +195,7 @@ export default function IntakeWizard({ initialSpec, onComplete }: Props) {
               <button
                 key={opt.value}
                 onClick={() => update("projectType", opt.value as ProjectSpec["projectType"])}
-                className={`p-3 rounded-xl border text-sm text-left transition-all ${
+                className={`p-3 sm:p-3 rounded-xl border text-sm text-left transition-all min-h-[44px] ${
                   spec.projectType === opt.value
                     ? "border-brand-500/50 bg-brand-500/10 text-white"
                     : "border-white/5 bg-white/[0.02] text-gray-400 hover:border-white/10"
@@ -237,12 +237,12 @@ export default function IntakeWizard({ initialSpec, onComplete }: Props) {
 
           <div>
             <label className="text-sm text-gray-400 mb-3 block">MCU family</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {MCU_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
                   onClick={() => update("mcu", opt.value)}
-                  className={`p-3 rounded-xl border text-center transition-all ${
+                  className={`p-3 rounded-xl border text-center transition-all min-h-[56px] ${
                     spec.mcu === opt.value
                       ? "border-brand-500/50 bg-brand-500/10"
                       : "border-white/5 bg-white/[0.02] hover:border-white/10"
@@ -262,7 +262,7 @@ export default function IntakeWizard({ initialSpec, onComplete }: Props) {
                 <button
                   key={opt.value}
                   onClick={() => toggleInterface(opt.value)}
-                  className={`px-3 py-1.5 rounded-lg border text-sm font-mono transition-all ${
+                  className={`px-3 py-2 sm:py-1.5 rounded-lg border text-sm font-mono transition-all min-h-[40px] ${
                     spec.interfaces?.includes(opt.value)
                       ? "border-brand-500/50 bg-brand-500/10 text-brand-300"
                       : "border-white/5 bg-white/[0.02] text-gray-400 hover:border-white/10"
@@ -319,13 +319,13 @@ export default function IntakeWizard({ initialSpec, onComplete }: Props) {
 
           <div>
             <label className="text-sm text-gray-400 mb-3 block">RTOS</label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
               {RTOS_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
                   onClick={() => opt.value !== "zephyr" && update("rtos", opt.value)}
                   disabled={opt.value === "zephyr"}
-                  className={`p-3 rounded-xl border text-center transition-all ${
+                  className={`p-3 sm:p-3 rounded-xl border text-left sm:text-center transition-all min-h-[56px] flex sm:flex-col items-center sm:items-center gap-3 sm:gap-0 ${
                     spec.rtos === opt.value
                       ? "border-brand-500/50 bg-brand-500/10"
                       : opt.value === "zephyr"
@@ -333,8 +333,8 @@ export default function IntakeWizard({ initialSpec, onComplete }: Props) {
                       : "border-white/5 bg-white/[0.02] hover:border-white/10"
                   }`}
                 >
-                  <div className="font-medium text-sm">{opt.label}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">{opt.desc}</div>
+                  <div className="font-medium text-sm shrink-0">{opt.label}</div>
+                  <div className="text-xs text-gray-500 sm:mt-0.5">{opt.desc}</div>
                 </button>
               ))}
             </div>
@@ -419,21 +419,21 @@ export default function IntakeWizard({ initialSpec, onComplete }: Props) {
       )}
 
       {/* Navigation */}
-      <div className="flex items-center justify-between mt-10 pt-6 border-t border-white/5">
+      <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 mt-10 pt-6 border-t border-white/5">
         <button
           onClick={() => {
             const order: Step[] = ["describe", "hardware", "firmware", "scope"];
             const idx = order.indexOf(step);
             if (idx > 0) setStep(order[idx - 1]);
           }}
-          className={`px-5 py-2.5 rounded-xl border border-white/10 text-sm text-gray-400 hover:text-white transition-colors ${step === "describe" ? "invisible" : ""}`}
+          className={`w-full sm:w-auto px-5 py-3 sm:py-2.5 rounded-xl border border-white/10 text-sm text-gray-400 hover:text-white transition-colors text-center ${step === "describe" ? "invisible" : ""}`}
         >
           ← Back
         </button>
         <button
           onClick={proceed}
           disabled={!canProceed()}
-          className="px-8 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-400 text-white text-sm font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto px-8 py-3 sm:py-2.5 rounded-xl bg-brand-500 hover:bg-brand-400 text-white text-sm font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed"
         >
           {step === "scope" ? "Generate BOM →" : "Continue →"}
         </button>
