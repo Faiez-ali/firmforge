@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import type { ProjectSpec, BOM } from "@/types";
 import IntakeWizard from "@/components/wizard/IntakeWizard";
 import BOMApproval from "@/components/bom/BOMApproval";
@@ -18,92 +18,107 @@ export default function GeneratePage() {
   const [files, setFiles] = useState<GeneratedFile[]>([]);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [readme, setReadme] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
 
   // Called when intake wizard completes the spec
   async function handleIntakeComplete(completedSpec: ProjectSpec) {
+    setError(null);
     setSpec(completedSpec);
-
-    // Generate BOM from the spec
-    const res = await fetch("/api/bom", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ spec: completedSpec }),
-    });
-    const data = await res.json();
-    setBOM(data.bom);
-    setStage("bom_review");
+    try {
+      const res = await fetch("/api/bom", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ spec: completedSpec }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? `BOM generation failed (${res.status})`);
+      }
+      const data = await res.json();
+      setBOM(data.bom);
+      setStage("bom_review");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to generate BOM. Please try again.");
+    }
   }
 
   // Called when user approves the BOM
   async function handleBOMApproved() {
-    // Create project record and get ID
-    const res = await fetch("/api/agents/intake", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ spec, bom }),
-    });
-    const data = await res.json();
-    setProjectId(data.projectId);
-    setStage("generating");
+    setError(null);
+    try {
+      const res = await fetch("/api/agents/intake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ spec, bom }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? `Failed to start generation (${res.status})`);
+      }
+      const data = await res.json();
+      setProjectId(data.projectId);
+      setStage("generating");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to start generation. Please try again.");
+    }
   }
 
-  // Called when generation pipeline completes
-  function handleGenerationComplete(output: {
+  // Stable reference — useCallback prevents SSE reconnect loop in GenerationProgress
+  const handleGenerationComplete = useCallback((output: {
     files: GeneratedFile[];
     downloadUrl: string;
     readme: string;
-  }) {
+  }) => {
     setFiles(output.files);
     setDownloadUrl(output.downloadUrl);
     setReadme(output.readme);
     setStage("complete");
-  }
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      {/* Top bar */}
-      <div className="border-b border-white/5 px-6 py-4 flex items-center justify-between">
-        <a href="/" className="text-lg font-semibold tracking-tight">
-          Firm<span className="text-brand-400">Forge</span>
-        </a>
+    <div className="px-6 py-12 max-w-4xl mx-auto">
+      <div className="flex items-center justify-between mb-10">
         <StageIndicator current={stage} />
       </div>
 
-      {/* Main content */}
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        {stage === "intake" && (
-          <IntakeWizard
-            initialSpec={spec}
-            onComplete={handleIntakeComplete}
-          />
-        )}
+      {error && (
+        <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+          {error}
+        </div>
+      )}
 
-        {stage === "bom_review" && bom && (
-          <BOMApproval
-            bom={bom}
-            spec={spec as ProjectSpec}
-            onApprove={handleBOMApproved}
-            onBack={() => setStage("intake")}
-          />
-        )}
+      {stage === "intake" && (
+        <IntakeWizard
+          initialSpec={spec}
+          onComplete={handleIntakeComplete}
+        />
+      )}
 
-        {stage === "generating" && projectId && bom && (
-          <GenerationProgress
-            projectId={projectId}
-            spec={spec as ProjectSpec}
-            bom={bom}
-            onComplete={handleGenerationComplete}
-          />
-        )}
+      {stage === "bom_review" && bom && (
+        <BOMApproval
+          bom={bom}
+          spec={spec as ProjectSpec}
+          onApprove={handleBOMApproved}
+          onBack={() => setStage("intake")}
+        />
+      )}
 
-        {stage === "complete" && (
-          <FilePreview
-            files={files}
-            readme={readme}
-            downloadUrl={downloadUrl ?? ""}
-          />
-        )}
-      </div>
+      {stage === "generating" && projectId && bom && (
+        <GenerationProgress
+          projectId={projectId}
+          spec={spec as ProjectSpec}
+          bom={bom}
+          onComplete={handleGenerationComplete}
+        />
+      )}
+
+      {stage === "complete" && (
+        <FilePreview
+          files={files}
+          readme={readme}
+          downloadUrl={downloadUrl ?? ""}
+        />
+      )}
     </div>
   );
 }

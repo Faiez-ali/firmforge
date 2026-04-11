@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { createClient } from "@/lib/supabase/server";
 
 const client = new Anthropic({ apiKey: process.env.CLAUDE_API_KEY });
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ hint: null }, { status: 401 });
+    }
+
     const { description, step } = await req.json();
 
     if (!description) {

@@ -1,4 +1,3 @@
-import { fetchRepoReadme } from "@/lib/github/client";
 import type { LibraryCandidate, EvaluationScore, LicenseType } from "@/types";
 
 // License scores — higher = more permissive

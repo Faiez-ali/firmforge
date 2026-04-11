@@ -15,7 +15,7 @@ export default async function DashboardLayout({
   // Fetch profile for plan badge and name
   const { data: profile } = await supabase
     .from("profiles")
-    .select("name, plan, generations_this_month, credits")
+    .select("name, plan, generations_today, credits")
     .eq("id", user.id)
     .single();
 

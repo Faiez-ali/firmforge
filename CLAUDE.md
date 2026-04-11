@@ -138,7 +138,7 @@ CMSIS / Vendor SDK    Startup, linker scripts             Always vendor-sourced,
 - Payments: Paddle only. Not Stripe. Pakistan-compatible.
 - Infrastructure budget: under $50/month until first revenue.
 - Desktop-first UI. Mobile works but is not the priority.
-- Free tier: 3 generations per calendar month per user.
+- Free tier: 3 generations per day per user (resets at 00:00 UTC via Supabase cron calling `reset_daily_generations()`).
 - Pro tier: $19/month, unlimited generations, all MCUs, RTOS, GitHub push.
 
 ---
@@ -169,9 +169,76 @@ GITHUB_API_TOKEN
 
 ---
 
-## Known issues to fix (as of session 4)
+## Code review findings (session 5 — 11 April 2026)
 
-1. `next.config.ts` → must be renamed `next.config.mjs` (Next.js 14 limitation)
+Full static review of all source files. Issues ordered by severity.
+
+### CRITICAL — ✅ All fixed (session 5)
+
+**C1. ✅ Unprotected API routes** — auth guard added to `app/api/bom/route.ts` and `app/api/agents/hint/route.ts`.
+
+**C2. ✅ No error handling in generate page** — try/catch added to both `handleIntakeComplete` and `handleBOMApproved`; error banner rendered in UI.
+
+**C3. ✅ Assembly agent silent empty return** — `callAssemblyAgent` now throws on malformed JSON or empty file array instead of returning `[]`.
+
+**C4. ✅ SSE reconnection loop** — `handleGenerationComplete` wrapped in `useCallback` in `generate/page.tsx`.
+
+### HIGH — ✅ All fixed (session 5)
+
+**H1. ✅ Missing dashboard pages** — stub pages created at `app/dashboard/projects/page.tsx` and `app/dashboard/settings/page.tsx`.
+
+**H2. ✅ No generation limit enforcement** — `app/api/agents/intake/route.ts` now checks `generations_today >= 3` for free-tier users before creating project; returns 403 with upgrade message. Counter incremented on success.
+
+**H3. ✅ R2 client confusing crash** — explicit env var check at module load in `lib/r2/client.ts`; throws a clear error naming the missing variables.
+
+### MEDIUM — fix before v1.0 release
+
+**M1. All user-added components hardcode `interface: "spi"`**
+- `components/wizard/IntakeWizard.tsx:75` — `addComponent()` always sets `interface: "spi"`.
+- Fix: add an interface selector dropdown in the component-add UI.
+
+**M2. ✅ `enrichWithLivePrices` fake timestamp** — removed the false `pricesFetchedAt` set; function returns raw BOM until real API calls are implemented.
+
+**M3. ✅ Generate page double-header layout** — removed custom `min-h-screen` wrapper and top bar from `generate/page.tsx`; relies on dashboard layout for chrome.
+
+**M4. No syntax highlighting in FilePreview**
+- `components/file-preview/FilePreview.tsx` — code viewer is a plain `<pre>` tag; Monaco editor installed but unused.
+- Fix: replace `<pre>` with Monaco in read-only mode.
+
+**M5. `runIntakeTurn` is dead code**
+- `lib/agents/intake.ts:32-70` — conversational intake function, never called. Form wizard handles intake.
+- No action needed for MVP; remove or wire up when adding conversational mode in v2.
+
+### LOW — cleanup
+
+**L1. ✅ Unused import in evaluate.ts** — `fetchRepoReadme` import removed.
+
+**L2. Duplicate Octokit dependency**
+- `package.json` has both `octokit` (v4) and `@octokit/rest` (v22). Only `@octokit/rest` is used.
+- Fix: `npm uninstall octokit` when next touching package.json.
+
+**L3. ✅ `next.config.ts` rename** — already resolved, item closed.
+
+---
+
+## Pipeline wiring — actual vs. documented
+
+The 6-step pipeline in CLAUDE.md doesn't map exactly to what's built:
+
+| Step | Documented | Actual |
+|---|---|---|
+| 1. Intake | Claude Haiku Q&A | Form wizard only — `runIntakeTurn` is dead code |
+| 2. BOM | Claude Haiku | ✅ Correct — `generateBOM()` in `/api/bom` |
+| 3. DB record | Implicit | ✅ `/api/agents/intake` creates Supabase row post-BOM-approval |
+| 4. Discovery | ✅ | ✅ `discoverLibraries()` — curated then GitHub API |
+| 5. Evaluation | ✅ | ✅ `evaluateCandidates()` — scoring by stars/recency/license |
+| 6. Assembly | ✅ | ✅ HAL → Drivers → App layers via Claude Sonnet |
+| 7. Compile validation | v1.1 | ✅ Correctly absent |
+| 8. Delivery | ✅ | ✅ JSZip → R2 upload → presigned URL |
+
+Missing between step 3 and 4: generation limit enforcement check.
+
+---
 
 ## Maintenance backlog (non-blocking, do in a future sprint)
 
@@ -180,8 +247,8 @@ GITHUB_API_TOKEN
   the `@humanwhocodes/config-array`, `@humanwhocodes/object-schema`, `rimraf`,
   `glob`, and `inflight` transitive dep warnings seen in Vercel build logs.
   Not urgent — ESLint 8 still works, this is purely a maintenance item.
-2. `app/layout.tsx` → uses `Geist` font (Next.js 15 only) → replace with `Inter` + `JetBrains_Mono`
-3. Run `npm audit fix` to address 17 vulnerabilities from npm install
+- `app/layout.tsx` → uses `Geist` font (Next.js 15 only) → replace with `Inter` + `JetBrains_Mono`
+- Run `npm audit fix` to address 17 vulnerabilities from npm install
 
 ---
 
@@ -195,11 +262,6 @@ GITHUB_API_TOKEN
 - **Evaluate agent (all 5 cases):** ✅ Pass
 - **Intake / Assemble / Deliver agents:** ❌ Blocked — no Anthropic API credits
 
-## Open PRs (merge when ready)
-
-- `fix/middleware-500` — middleware Supabase env guard (safe to merge)
-- `chore/maintenance-backlog` — ESLint backlog note in CLAUDE.md (safe to merge)
-
 ## ⚠️ Blocked — waiting on credentials (DO NOT SKIP)
 
 ### 1. Anthropic API credits — CRITICAL
@@ -207,14 +269,11 @@ GITHUB_API_TOKEN
 - Top up at: https://console.anthropic.com/settings/billing
 - Unblocks all Phase 1 agent testing
 
-### 2. Look for any missing portions in the project
-- Claude along withh Codex should review the compplete code.
-- Create different simulation scenarios and check for any anomolies.
-- Make a complete plan to fix those anomolies so that the instant fixes won't createw bugs in future.
-
 ## Next session priorities
 
-When Anthropic credits are topped up, run in this order:
+All CRITICAL and HIGH issues are fixed. Remaining before v1.0: M1 (component interface selector) and M4 (Monaco syntax highlighting).
+
+Once Anthropic credits are topped up, run agents in this order:
 ```bash
 npx tsx scripts/test-pipeline.ts --agent intake --all
 npx tsx scripts/test-pipeline.ts --agent assemble --all
@@ -236,19 +295,10 @@ as an embedded engineer before starting Phase 4 (billing, UI, limits).
 
 ---
 
-## ⚠️ BLOCKED — Waiting on credentials (DO NOT SKIP)
+## ⚠️ Vercel environment variables — CRITICAL
 
-These tasks are blocked on missing credentials and MUST be completed before
-Phase 1 testing can proceed. Do not skip or defer them.
-
-### 1. Anthropic API credits — CRITICAL
-- **Blocker:** Credit balance = $0. All Claude API calls fail (intake, assemble, deliver agents).
-- **Action:** Top up at https://console.anthropic.com/settings/billing
-- **Unblocks:** `npx tsx scripts/test-pipeline.ts --agent intake --case 1` (and all 5 cases for all 3 agents)
-
-### 2. Vercel environment variables — CRITICAL
 These are NOT set in the Vercel project dashboard. Without them:
-- Middleware silently bypasses all auth (500 MIDDLEWARE_INVOCATION_FAILED without the guard)
+- Middleware silently bypasses all auth
 - Dashboard routes are unprotected
 - Auth (login/signup) cannot connect to Supabase
 
@@ -262,19 +312,17 @@ Go to: https://vercel.com/faiez-alis-projects/firmforge/settings/environment-var
 | `CLAUDE_API_KEY` | console.anthropic.com (after topping up) |
 | `GITHUB_API_TOKEN` | github.com → Settings → Developer settings → Personal access tokens |
 
-### 3. Phase 1 agent tests — blocked on #1 above
-Once Anthropic credits are added, run in order:
-```bash
-npx tsx scripts/test-pipeline.ts --agent intake --case 1
-npx tsx scripts/test-pipeline.ts --agent intake --all
-npx tsx scripts/test-pipeline.ts --agent assemble --case 1
-npx tsx scripts/test-pipeline.ts --agent assemble --all
-npx tsx scripts/test-pipeline.ts --agent deliver --case 1
-npx tsx scripts/test-pipeline.ts --all
-```
+---
 
-### 4. Open PRs to merge
-- `fix/middleware-500` — middleware Supabase env var guard (ready to merge)
+## Post-launch TODO (do after full functionality is verified)
+
+### Google AdSense integration — free tier only
+- Show Google AdSense ads to free-tier users only. Pro and Team accounts see no ads.
+- Ads must be restricted to relevant categories only: **electronics, embedded systems, automation, AI/ML, and technology**.
+- Explicitly block irrelevant or inappropriate categories in AdSense settings: no adult/pornographic, no grocery/food, no generic marketing/retail, no unrelated consumer products.
+- Implementation approach: wrap ad slots in a check against the user's plan — only render if `plan === "free"`.
+- Ad placement TBD (sidebar, below file preview, etc.) — decide after reviewing UX impact.
+- Do NOT implement this until FirmForge core functionality is fully tested and verified end-to-end (all agents, billing, download flow).
 
 ---
 

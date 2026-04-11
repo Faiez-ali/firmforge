@@ -16,8 +16,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const projectId = randomUUID();
     const supabase = createAdminClient();
+
+    // Enforce daily generation limit for free-tier users
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("plan, generations_today")
+      .eq("id", user.id)
+      .single();
+
+    if (profile && profile.plan === "free" && profile.generations_today >= 3) {
+      return NextResponse.json(
+        { error: "Daily generation limit reached. Upgrade to Pro for unlimited generations." },
+        { status: 403 }
+      );
+    }
+
+    const projectId = randomUUID();
 
     // Save project record to Supabase
     const { error } = await supabase.from("projects").insert({
@@ -32,6 +47,12 @@ export async function POST(req: NextRequest) {
     if (error) {
       // If DB not set up yet, still return projectId for development
       console.warn("Supabase insert failed (expected during initial setup):", error.message);
+    } else {
+      // Increment daily generation counter
+      await supabase
+        .from("profiles")
+        .update({ generations_today: (profile?.generations_today ?? 0) + 1 })
+        .eq("id", user.id);
     }
 
     return NextResponse.json({ projectId });
