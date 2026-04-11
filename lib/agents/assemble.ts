@@ -221,10 +221,15 @@ async function callAssemblyAgent(
   const text =
     response.content[0].type === "text" ? response.content[0].text : "[]";
 
+  const clean = text.replace(/```json\n?|\n?```/g, "").trim();
+  let parsed: GeneratedFile[];
   try {
-    const clean = text.replace(/```json\n?|\n?```/g, "").trim();
-    return JSON.parse(clean);
+    parsed = JSON.parse(clean);
   } catch {
-    return [];
+    throw new Error(`Assembly agent returned malformed JSON. Raw response: ${text.slice(0, 200)}`);
   }
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    throw new Error(`Assembly agent returned no files. Raw response: ${text.slice(0, 200)}`);
+  }
+  return parsed;
 }

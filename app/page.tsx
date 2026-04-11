@@ -4,6 +4,10 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import McuShowcase from "@/components/mcu/McuShowcase";
+import CircuitBg from "@/components/hero/CircuitBg";
+import StepPlayer from "@/components/how-it-works/StepPlayer";
+import IdeaTicker from "@/components/hero/IdeaTicker";
+import HwSwAnim from "@/components/cta/HwSwAnim";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -13,51 +17,6 @@ const fadeUp = {
     transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: i * 0.08 },
   }),
 };
-
-const STEPS = [
-  {
-    step: "01",
-    title: "Describe your project",
-    desc: "Tell FirmForge what your device does in plain language. The intake agent asks targeted questions until it has a complete picture.",
-    color: "from-blue-500 to-cyan-400",
-    glow: "group-hover:shadow-blue-500/20",
-  },
-  {
-    step: "02",
-    title: "Approve your BOM",
-    desc: "Review a Bill of Materials with live prices from LCSC and Mouser. Swap components, approve, and generation begins.",
-    color: "from-violet-500 to-purple-400",
-    glow: "group-hover:shadow-violet-500/20",
-  },
-  {
-    step: "03",
-    title: "Open-source discovery",
-    desc: "FirmForge searches GitHub, PlatformIO, Arduino, and ESP-IDF for the best available drivers per component.",
-    color: "from-cyan-500 to-teal-400",
-    glow: "group-hover:shadow-cyan-500/20",
-  },
-  {
-    step: "04",
-    title: "Library evaluation",
-    desc: "Each candidate is scored on stars, recency, license, and MCU compatibility. Only the best makes it in.",
-    color: "from-teal-500 to-green-400",
-    glow: "group-hover:shadow-teal-500/20",
-  },
-  {
-    step: "05",
-    title: "Codebase assembly",
-    desc: "Drivers, HAL, middleware, and application layers assembled into a structured project. Claude fills any gaps.",
-    color: "from-green-500 to-emerald-400",
-    glow: "group-hover:shadow-green-500/20",
-  },
-  {
-    step: "06",
-    title: "Download & go",
-    desc: "Browse the generated files in-browser. Download as zip or push directly to a GitHub repo (Pro).",
-    color: "from-amber-500 to-orange-400",
-    glow: "group-hover:shadow-amber-500/20",
-  },
-];
 
 const PLANS = [
   {
@@ -102,8 +61,6 @@ const PLANS = [
   },
 ];
 
-const MCUS = ["STM32", "ESP32", "RP2040", "nRF52", "AVR", "SAME5x"];
-
 export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
@@ -113,11 +70,10 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#060610] text-white overflow-x-hidden">
 
-      {/* ── Aurora background ── */}
+      {/* ── Page-level aurora (below the fold) ── */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full bg-blue-600/10 blur-[120px] animate-pulse-slow" />
-        <div className="absolute top-1/3 -right-40 w-[600px] h-[600px] rounded-full bg-violet-600/10 blur-[120px] animate-pulse-slow" style={{ animationDelay: "1.5s" }} />
-        <div className="absolute bottom-0 left-1/3 w-[500px] h-[500px] rounded-full bg-cyan-600/8 blur-[100px] animate-pulse-slow" style={{ animationDelay: "3s" }} />
+        <div className="absolute top-1/3 -right-40 w-[600px] h-[600px] rounded-full bg-violet-600/8 blur-[120px] animate-pulse-slow" style={{ animationDelay: "1.5s" }} />
+        <div className="absolute bottom-0 left-1/3 w-[500px] h-[500px] rounded-full bg-cyan-600/6 blur-[100px] animate-pulse-slow" style={{ animationDelay: "3s" }} />
       </div>
 
       {/* ── Nav ── */}
@@ -125,9 +81,9 @@ export default function Home() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="sticky top-0 z-50 border-b border-white/5 backdrop-blur-xl bg-[#060610]/80 px-6 py-4"
+        className="sticky top-0 z-50 border-b border-white/5 backdrop-blur-xl bg-[#060610]/80 px-8 lg:px-16 py-4"
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="w-full flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
             <span className="text-lg font-bold tracking-tight">
               Firm<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Forge</span>
@@ -157,8 +113,23 @@ export default function Home() {
       </motion.nav>
 
       {/* ── Hero ── */}
-      <section ref={heroRef} className="relative min-h-[90vh] flex flex-col items-center justify-center px-6 pt-16 pb-24 z-10">
-        <motion.div style={{ y: heroY, opacity: heroOpacity }} className="text-center max-w-5xl mx-auto">
+      <section ref={heroRef} className="relative min-h-[90vh] flex flex-col items-center justify-center px-6 pt-16 pb-24 z-10 overflow-hidden">
+
+        {/* Circuit board background animation */}
+        <CircuitBg />
+
+        {/* Radial gradient mask so text stays readable over the circuit */}
+        <div
+          className="absolute inset-0 pointer-events-none z-[1]"
+          style={{
+            background:
+              "radial-gradient(ellipse 70% 60% at 50% 40%, transparent 0%, #060610 85%)",
+          }}
+        />
+
+        {/* Subtle blue glow centered on the hero */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full bg-blue-600/10 blur-[100px] pointer-events-none z-[1]" />
+        <motion.div style={{ y: heroY, opacity: heroOpacity }} className="relative z-10 text-center max-w-5xl mx-auto">
 
           <motion.div
             variants={fadeUp} initial="hidden" animate="show" custom={0}
@@ -207,80 +178,24 @@ export default function Home() {
             </Link>
           </motion.div>
 
-          {/* MCU chips */}
-          <motion.div
-            variants={fadeUp} initial="hidden" animate="show" custom={4}
-            className="flex items-center justify-center gap-3 flex-wrap"
-          >
-            <span className="text-sm text-gray-500">Supports</span>
-            {MCUS.map((mcu, i) => (
-              <motion.span
-                key={mcu}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + i * 0.06, duration: 0.3 }}
-                className="px-3 py-1 rounded-full bg-white/5 border border-white/10 hover:border-blue-500/40 hover:bg-blue-500/10 text-sm text-gray-300 font-mono transition-all duration-200 cursor-default"
-              >
-                {mcu}
-              </motion.span>
-            ))}
-          </motion.div>
         </motion.div>
 
-        {/* Floating terminal card */}
+        {/* Idea ticker — random 10 per tab, seamless scroll */}
         <motion.div
-          initial={{ opacity: 0, y: 40, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ delay: 0.8, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="relative mt-20 max-w-2xl w-full mx-auto z-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7, duration: 0.8 }}
+          className="relative z-10 w-full"
         >
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 blur-xl" />
-          <div className="relative rounded-2xl border border-white/10 bg-[#0d0d1a]/90 backdrop-blur-xl overflow-hidden shadow-2xl">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
-              <div className="w-3 h-3 rounded-full bg-red-500/70" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
-              <div className="w-3 h-3 rounded-full bg-green-500/70" />
-              <span className="ml-2 text-xs text-gray-500 font-mono">firmforge — agent pipeline</span>
-            </div>
-            <div className="p-5 font-mono text-sm space-y-2">
-              {[
-                { label: "intake", color: "text-blue-400", msg: "Project spec locked — STM32F4 + BME280 + SSD1306" },
-                { label: "discover", color: "text-violet-400", msg: "Found 14 candidates across GitHub + PlatformIO" },
-                { label: "evaluate", color: "text-cyan-400", msg: "adafruit/Adafruit_BME280 scored 94/100 ✓" },
-                { label: "assemble", color: "text-green-400", msg: "Generating driver + HAL + main.c layers..." },
-                { label: "deliver", color: "text-amber-400", msg: "firmware_stm32f4_weather.zip ready (47 files)" },
-              ].map((line, i) => (
-                <motion.div
-                  key={line.label}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 1.1 + i * 0.15, duration: 0.4 }}
-                  className="flex items-start gap-3"
-                >
-                  <span className={`${line.color} shrink-0`}>[{line.label}]</span>
-                  <span className="text-gray-300">{line.msg}</span>
-                </motion.div>
-              ))}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.9, duration: 0.3 }}
-                className="flex items-center gap-2 pt-1"
-              >
-                <span className="text-green-400">✓</span>
-                <span className="text-green-400 font-semibold">Pipeline complete in 38s</span>
-                <span className="w-2 h-4 bg-green-400 animate-pulse ml-1" />
-              </motion.div>
-            </div>
-          </div>
+          <IdeaTicker />
         </motion.div>
       </section>
 
-      {/* ── Features / How it works ── */}
-      <section id="features" className="relative z-10 px-6 py-32 max-w-7xl mx-auto">
+      {/* ── How it works — interactive step player ── */}
+      <section id="features" className="relative z-10 px-8 lg:px-16 py-32">
         <motion.div
           initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}
-          className="text-center mb-20"
+          className="text-center mb-14"
         >
           <motion.p variants={fadeUp} custom={0} className="text-blue-400 font-mono text-sm mb-3 uppercase tracking-widest">
             How it works
@@ -289,31 +204,19 @@ export default function Home() {
             Six agents. One firmware project.
           </motion.h2>
           <motion.p variants={fadeUp} custom={2} className="text-gray-400 max-w-xl mx-auto">
-            Each agent runs in sequence after you approve your Bill of Materials.
-            No manual steps. No setup.
+            Watch the pipeline run — each step animates automatically.
+            Click any tab to jump, or use the controls below.
           </motion.p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {STEPS.map((f, i) => (
-            <motion.div
-              key={f.step}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              className={`group relative p-6 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300 hover:shadow-2xl ${f.glow} cursor-default`}
-            >
-              <div className={`inline-flex w-10 h-10 rounded-xl bg-gradient-to-br ${f.color} items-center justify-center mb-4 shadow-lg`}>
-                <span className="text-white font-bold text-xs">{f.step}</span>
-              </div>
-              <h3 className="font-semibold text-lg mb-2 text-white">{f.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
-              <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-300`} />
-            </motion.div>
-          ))}
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <StepPlayer />
+        </motion.div>
       </section>
 
       {/* ── MCU Showcase ── */}
@@ -443,38 +346,95 @@ export default function Home() {
       </section>
 
       {/* ── CTA banner ── */}
-      <section className="relative z-10 px-6 py-24">
+      <section className="relative z-10 px-8 lg:px-16 py-24">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="max-w-3xl mx-auto text-center"
         >
-          <div className="relative rounded-3xl border border-blue-500/20 bg-gradient-to-b from-blue-500/10 to-violet-500/5 p-16 overflow-hidden">
+          <div className="relative rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-500/10 via-[#060610] to-violet-500/8 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-cyan-600/5 to-violet-600/5" />
-            <h2 className="relative text-4xl md:text-5xl font-bold mb-4">
-              Ready to build your<br />
-              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                next firmware project?
-              </span>
-            </h2>
-            <p className="relative text-gray-400 mb-10 text-lg">
-              Join engineers shipping embedded products faster with AI.
-            </p>
-            <Link
-              href="/dashboard/generate"
-              className="relative inline-flex items-center gap-2 px-10 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold text-lg transition-all duration-300 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105"
-            >
-              Start for free →
-            </Link>
+
+            <div className="relative flex flex-col lg:flex-row items-center gap-0">
+
+              {/* ── Left: copy + CTA ── */}
+              <div className="flex-none lg:w-[42%] px-12 py-16 flex flex-col items-start">
+                <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+                  Ready to build your<br />
+                  <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                    next firmware project?
+                  </span>
+                </h2>
+                <p className="text-gray-400 mb-10 text-lg leading-relaxed">
+                  Join engineers shipping embedded products faster with AI.
+                </p>
+                <Link
+                  href="/dashboard/generate"
+                  className="inline-flex items-center gap-2 px-10 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold text-lg transition-all duration-300 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105"
+                >
+                  Start for free →
+                </Link>
+              </div>
+
+              {/* ── Divider ── */}
+              <div className="hidden lg:block w-px self-stretch bg-white/5" />
+
+              {/* ── Right: hardware–software animation ── */}
+              <div className="flex-1 px-8 py-12 flex flex-col gap-3">
+                <p className="text-[10px] font-mono text-gray-600 tracking-widest uppercase">
+                  Live signal flow
+                </p>
+                <div className="w-full h-[190px]">
+                  <HwSwAnim />
+                </div>
+                <p className="text-[11px] text-gray-600 font-mono">
+                  Hardware peripherals ↔ STM32 MCU ↔ Layered firmware — generated in seconds.
+                </p>
+              </div>
+
+            </div>
           </div>
         </motion.div>
       </section>
 
+      {/* ── Consultation CTA ── */}
+      <section className="relative z-10 px-8 lg:px-16 py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col md:flex-row items-center justify-between gap-8 rounded-2xl border border-white/8 bg-white/[0.025] px-10 py-10"
+        >
+          {/* Left — copy */}
+          <div>
+            <p className="text-xs font-mono text-blue-400 tracking-widest uppercase mb-2">
+              Expert help
+            </p>
+            <h2 className="text-2xl md:text-3xl font-bold text-white leading-snug mb-2">
+              Want us to build your<br className="hidden md:block" /> project together?
+            </h2>
+            <p className="text-gray-400 text-sm max-w-md">
+              Book a 1-on-1 session with a firmware engineer. We&apos;ll scope
+              your hardware, walk through the generated code, and get your
+              device running faster.
+            </p>
+          </div>
+
+          {/* Right — CTA */}
+          <a
+            href="mailto:hello@firmforge.dev?subject=Consultation%20Request&body=Hi%2C%20I%27d%20like%20to%20book%20a%20consultation."
+            className="flex-none inline-flex items-center gap-2 px-8 py-3.5 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 hover:text-white font-semibold text-sm transition-all duration-300 whitespace-nowrap"
+          >
+            Book a consultation →
+          </a>
+        </motion.div>
+      </section>
+
       {/* ── Footer ── */}
-      <footer className="relative z-10 border-t border-white/5 px-6 py-10">
-        <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4 text-sm text-gray-500">
+      <footer className="relative z-10 border-t border-white/5 px-8 lg:px-16 py-10">
+        <div className="w-full flex items-center justify-between flex-wrap gap-4 text-sm text-gray-500">
           <span>
             Firm<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-semibold">Forge</span> © 2026
           </span>

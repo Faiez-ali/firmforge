@@ -10,7 +10,7 @@ create table public.profiles (
   email       text not null,
   name        text,
   plan        text not null default 'free' check (plan in ('free', 'pro', 'team')),
-  generations_this_month integer not null default 0,
+  generations_today integer not null default 0,
   credits     integer not null default 0,
   referral_code text unique default substring(md5(random()::text), 1, 8),
   referred_by uuid references public.profiles(id),
@@ -62,10 +62,10 @@ create policy "users can view own projects"
 create policy "users can insert own projects"
   on public.projects for insert with check (auth.uid() = user_id);
 
--- Function: reset monthly generation count (called by cron)
-create or replace function reset_monthly_generations()
+-- Function: reset daily generation count (called by cron — schedule: daily at 00:00 UTC)
+create or replace function reset_daily_generations()
 returns void language sql as $$
-  update public.profiles set generations_this_month = 0;
+  update public.profiles set generations_today = 0;
 $$;
 
 -- Function: auto-create profile on user signup

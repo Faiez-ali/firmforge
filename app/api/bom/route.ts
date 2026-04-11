@@ -2,10 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 import { generateBOM } from "@/lib/agents/intake";
+import { createClient } from "@/lib/supabase/server";
 import type { ProjectSpec } from "@/types";
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { spec }: { spec: ProjectSpec } = await req.json();
 
     if (!spec) {
@@ -26,12 +33,12 @@ export async function POST(req: NextRequest) {
 
 async function enrichWithLivePrices(bom: Awaited<ReturnType<typeof generateBOM>>) {
   // Live price enrichment — LCSC and Mouser APIs
-  // Gracefully skips if API keys are not configured
+  // Returns estimated prices until API integration is implemented (v1.1)
   if (!process.env.LCSC_API_KEY && !process.env.MOUSER_API_KEY) {
-    return bom; // Return with static estimated prices
+    return bom;
   }
 
-  // TODO: Implement LCSC and Mouser API calls per item
-  // For now, return as-is with estimated prices
-  return { ...bom, pricesFetchedAt: new Date().toISOString() };
+  // TODO: Implement LCSC and Mouser API calls per item.
+  // Only set pricesFetchedAt once real prices are actually returned.
+  return bom;
 }

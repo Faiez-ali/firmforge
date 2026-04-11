@@ -208,8 +208,8 @@ export interface UserProfile {
   name?: string;
   avatarUrl?: string;
   plan: PlanTier;
-  generationsThisMonth: number;
-  generationsLimit: number;      // 3 for free, -1 for unlimited
+  generationsToday: number;
+  generationsLimit: number;      // 3 per day for free, -1 for unlimited
   credits: number;               // Pay-per-use credits
   githubAccessToken?: string;    // For Pro GitHub push
   createdAt: string;
