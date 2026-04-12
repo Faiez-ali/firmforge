@@ -23,7 +23,7 @@ const PLANS = [
     name: "Free",
     price: "$0",
     per: "",
-    features: ["3 generations / month", "STM32 + ESP32", "Bare-metal only", "Zip download"],
+    features: ["3 generations / day", "STM32 + ESP32", "Bare-metal only", "Zip download"],
     missing: ["Compile validation", "RTOS support", "GitHub push"],
     cta: "Start free",
     highlight: false,

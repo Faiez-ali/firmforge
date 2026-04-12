@@ -7,7 +7,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("name, plan, generations_this_month, credits")
+    .select("name, plan, generations_today, credits")
     .eq("id", user!.id)
     .single();
 
@@ -19,9 +19,9 @@ export default async function DashboardPage() {
     .limit(5);
 
   const plan = profile?.plan ?? "free";
-  const usedThisMonth = profile?.generations_this_month ?? 0;
+  const usedToday = profile?.generations_today ?? 0;
   const limit = plan === "free" ? 3 : -1;
-  const remaining = limit === -1 ? "∞" : Math.max(0, limit - usedThisMonth);
+  const remaining = limit === -1 ? "∞" : Math.max(0, limit - usedToday);
 
   return (
     <div className="p-8 max-w-5xl">
@@ -32,7 +32,7 @@ export default async function DashboardPage() {
         </h1>
         <p className="text-gray-400 text-sm mt-1">
           {plan === "free"
-            ? `${remaining} of ${limit} free generations remaining this month`
+            ? `${remaining} of ${limit} free generations remaining today (resets midnight UTC)`
             : "Unlimited generations · Pro plan"}
         </p>
       </div>
@@ -40,9 +40,9 @@ export default async function DashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         <StatCard
-          label="Generations this month"
-          value={String(usedThisMonth)}
-          sub={plan === "free" ? `of ${limit} free` : "unlimited"}
+          label="Generations today"
+          value={String(usedToday)}
+          sub={plan === "free" ? `of ${limit} free · resets midnight UTC` : "unlimited"}
         />
         <StatCard
           label="Total projects"

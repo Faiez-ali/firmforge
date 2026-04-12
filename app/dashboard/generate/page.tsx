@@ -19,6 +19,7 @@ export default function GeneratePage() {
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [readme, setReadme] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [limitInfo, setLimitInfo] = useState<{ resetIn: string; resetsAt: string } | null>(null);
 
   // Called when intake wizard completes the spec
   async function handleIntakeComplete(completedSpec: ProjectSpec) {
@@ -45,6 +46,7 @@ export default function GeneratePage() {
   // Called when user approves the BOM
   async function handleBOMApproved() {
     setError(null);
+    setLimitInfo(null);
     try {
       const res = await fetch("/api/agents/intake", {
         method: "POST",
@@ -53,6 +55,9 @@ export default function GeneratePage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        if (res.status === 403 && data.limitReached) {
+          setLimitInfo({ resetIn: data.resetIn, resetsAt: data.resetsAt });
+        }
         throw new Error(data.error ?? `Failed to start generation (${res.status})`);
       }
       const data = await res.json();
@@ -81,9 +86,38 @@ export default function GeneratePage() {
         <StageIndicator current={stage} />
       </div>
 
-      {error && (
+      {error && !limitInfo && (
         <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
           {error}
+        </div>
+      )}
+
+      {limitInfo && (
+        <div className="mb-6 p-5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl leading-none mt-0.5">⏳</span>
+            <div className="flex-1">
+              <p className="text-amber-300 font-semibold mb-1">Daily limit reached — 3 of 3 generations used</p>
+              <p className="text-amber-200/70">
+                Your free quota resets at{" "}
+                <span className="text-amber-300 font-medium">midnight UTC</span>
+                {" "}—{" "}
+                <span className="text-amber-300 font-medium">in {limitInfo.resetIn}</span>.
+              </p>
+              <p className="text-amber-200/50 text-xs mt-2">
+                Reset time: {new Date(limitInfo.resetsAt).toLocaleString(undefined, {
+                  weekday: "short", month: "short", day: "numeric",
+                  hour: "2-digit", minute: "2-digit", timeZoneName: "short",
+                })}
+              </p>
+              <a
+                href="/dashboard/settings#billing"
+                className="inline-flex items-center gap-1.5 mt-3 px-4 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-semibold transition-colors"
+              >
+                Upgrade to Pro — unlimited generations →
+              </a>
+            </div>
+          </div>
         </div>
       )}
 

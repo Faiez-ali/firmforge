@@ -26,8 +26,24 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (profile && profile.plan === "free" && profile.generations_today >= 3) {
+      // Calculate time until midnight UTC (when the counter resets)
+      const now = new Date();
+      const midnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+      const msLeft = midnight.getTime() - now.getTime();
+      const hoursLeft = Math.floor(msLeft / (1000 * 60 * 60));
+      const minutesLeft = Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60));
+      const resetIn =
+        hoursLeft > 0
+          ? `${hoursLeft}h ${minutesLeft}m`
+          : `${minutesLeft}m`;
+
       return NextResponse.json(
-        { error: "Daily generation limit reached. Upgrade to Pro for unlimited generations." },
+        {
+          error: `Daily limit reached (3/3 used). Your quota resets at midnight UTC — in ${resetIn}. Upgrade to Pro for unlimited generations.`,
+          limitReached: true,
+          resetsAt: midnight.toISOString(),
+          resetIn,
+        },
         { status: 403 }
       );
     }
