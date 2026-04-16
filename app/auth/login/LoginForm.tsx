@@ -4,6 +4,17 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07 } },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } },
+};
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -12,7 +23,12 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") ?? "/dashboard";
+  // Sanitize redirect — only allow relative paths to prevent open-redirect
+  const rawRedirect = searchParams.get("redirect") ?? "/dashboard";
+  const redirect =
+    rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+      ? rawRedirect
+      : "/dashboard";
   const supabase = createClient();
 
   async function handleEmailLogin(e: React.FormEvent) {
@@ -61,42 +77,56 @@ export function LoginForm() {
   }
 
   return (
-    <div className="w-full max-w-sm">
-      <div className="text-center mb-8">
-        <Link href="/" className="text-xl font-semibold tracking-tight">
-          Firm<span className="text-brand-400">Forge</span>
+    <motion.div
+      className="w-full max-w-sm"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      {/* Header */}
+      <motion.div variants={item} className="text-center mb-8">
+        <Link href="/" className="text-xl font-semibold tracking-tight lg:hidden">
+          Firm<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Forge</span>
         </Link>
         <p className="text-gray-400 text-sm mt-2">Sign in to your account</p>
-      </div>
+      </motion.div>
 
-      <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
-        <div className="flex flex-col gap-2">
-          <button
+      {/* Card */}
+      <motion.div
+        variants={item}
+        className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 backdrop-blur-sm"
+      >
+        {/* OAuth buttons */}
+        <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col gap-2">
+          <motion.button
+            variants={item}
             onClick={handleGoogleLogin}
             disabled={loading}
             className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-colors disabled:opacity-50"
           >
             <GoogleIcon />
             Continue with Google
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            variants={item}
             onClick={handleGitHubLogin}
             disabled={loading}
             className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-colors disabled:opacity-50"
           >
             <GitHubIcon />
             Continue with GitHub
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
 
-        <div className="flex items-center gap-3 my-5">
+        <motion.div variants={item} className="flex items-center gap-3 my-5">
           <div className="flex-1 h-px bg-white/5" />
           <span className="text-xs text-gray-600">or</span>
           <div className="flex-1 h-px bg-white/5" />
-        </div>
+        </motion.div>
 
+        {/* Email / password form */}
         <form onSubmit={handleEmailLogin} className="space-y-3">
-          <div>
+          <motion.div variants={item}>
             <label className="text-xs text-gray-400 mb-1.5 block">Email</label>
             <input
               type="email"
@@ -104,13 +134,14 @@ export function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-brand-500/50"
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 transition-colors"
             />
-          </div>
-          <div>
+          </motion.div>
+
+          <motion.div variants={item}>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs text-gray-400">Password</label>
-              <Link href="/auth/forgot-password" className="text-xs text-brand-400 hover:text-brand-300">
+              <Link href="/auth/forgot-password" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
                 Forgot password?
               </Link>
             </div>
@@ -120,33 +151,44 @@ export function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-brand-500/50"
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 transition-colors"
             />
-          </div>
+          </motion.div>
 
-          {error && (
-            <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
-              {error}
-            </div>
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2"
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          <button
+          <motion.button
+            variants={item}
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-brand-500 hover:bg-brand-400 text-white text-sm font-medium transition-colors disabled:opacity-50 mt-1"
+            whileHover={{ scale: loading ? 1 : 1.01 }}
+            whileTap={{ scale: loading ? 1 : 0.98 }}
+            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-sm font-medium transition-all disabled:opacity-50 mt-1 shadow-lg shadow-blue-500/20"
           >
             {loading ? "Signing in..." : "Sign in"}
-          </button>
+          </motion.button>
         </form>
-      </div>
+      </motion.div>
 
-      <p className="text-center text-sm text-gray-500 mt-5">
+      <motion.p variants={item} className="text-center text-sm text-gray-500 mt-5">
         No account?{" "}
-        <Link href="/auth/signup" className="text-brand-400 hover:text-brand-300">
+        <Link href="/auth/signup" className="text-blue-400 hover:text-blue-300 transition-colors">
           Sign up free
         </Link>
-      </p>
-    </div>
+      </motion.p>
+    </motion.div>
   );
 }
 

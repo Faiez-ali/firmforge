@@ -1,9 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
+import { z } from "zod";
 import { generateBOM } from "@/lib/agents/intake";
 import { createClient } from "@/lib/supabase/server";
-import type { ProjectSpec } from "@/types";
+
+const SpecSchema = z.object({
+  description: z.string().min(1).max(2000),
+  mcu: z.string().min(1).max(100),
+  rtos: z.string().optional(),
+  buildSystem: z.string().optional(),
+  components: z.array(z.object({
+    name: z.string().min(1).max(100),
+    interface: z.string().optional(),
+    partNumber: z.string().optional(),
+  })).optional(),
+  additionalContext: z.string().max(2000).optional(),
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,11 +26,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { spec }: { spec: ProjectSpec } = await req.json();
-
-    if (!spec) {
-      return NextResponse.json({ error: "spec is required" }, { status: 400 });
+    const body = await req.json().catch(() => null);
+    if (!body) {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
+
+    const parsed = SpecSchema.safeParse(body.spec);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid spec", details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+    const spec = parsed.data;
 
     const bom = await generateBOM(spec);
 

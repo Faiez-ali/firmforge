@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { z } from "zod";
 import { discoverLibraries } from "@/lib/agents/discover";
 import { evaluateCandidates, getLicenseWarnings } from "@/lib/agents/evaluate";
 import {
@@ -14,6 +15,34 @@ import type { ProjectSpec, BOM } from "@/types";
 export const maxDuration = 300; // 5 min timeout on Vercel Pro
 export const dynamic = "force-dynamic";
 
+const StreamBodySchema = z.object({
+  projectId: z.string().uuid(),
+  spec: z.object({
+    description: z.string().min(1).max(2000),
+    mcu: z.string().min(1).max(100),
+    rtos: z.string().optional(),
+    buildSystem: z.string().optional(),
+    components: z.array(z.object({
+      name: z.string().min(1).max(100),
+      interface: z.string().optional(),
+      partNumber: z.string().optional(),
+    })).optional(),
+    additionalContext: z.string().max(2000).optional(),
+  }),
+  bom: z.object({
+    items: z.array(z.object({
+      name: z.string().min(1).max(200),
+      partNumber: z.string().optional(),
+      quantity: z.number().int().positive().optional(),
+      estimatedPrice: z.number().nonnegative().optional(),
+      supplier: z.string().optional(),
+      notes: z.string().optional(),
+    })),
+    estimatedTotal: z.number().nonnegative().optional(),
+    notes: z.string().optional(),
+  }),
+});
+
 export async function POST(req: NextRequest) {
   // Verify the user is authenticated before starting the pipeline
   const supabaseAuth = await createClient();
@@ -25,8 +54,40 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const { projectId, spec, bom }: { projectId: string; spec: ProjectSpec; bom: BOM } =
-    await req.json();
+  const rawBody = await req.json().catch(() => null);
+  if (!rawBody) {
+    return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const parsed = StreamBodySchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return new Response(JSON.stringify({ error: "Invalid request body", details: parsed.error.flatten().fieldErrors }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const { projectId, spec, bom } = parsed.data as { projectId: string; spec: ProjectSpec; bom: BOM };
+
+  // Verify the projectId belongs to the authenticated user — prevents one user
+  // from hijacking another user's generation slot.
+  const supabaseAdmin = createAdminClient();
+  const { data: project, error: projectErr } = await supabaseAdmin
+    .from("projects")
+    .select("id")
+    .eq("id", projectId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (projectErr || !project) {
+    return new Response(JSON.stringify({ error: "Project not found" }), {
+      status: 404,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
   // Set up SSE stream
   const encoder = new TextEncoder();

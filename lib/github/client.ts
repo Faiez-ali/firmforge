@@ -1,7 +1,7 @@
 import { Octokit } from "@octokit/rest";
 import type { LibraryCandidate, MCUFamily, LicenseType } from "@/types";
 
-const octokit = new Octokit({ auth: process.env.GITHUB_API_TOKEN });
+const octokit = new Octokit({ auth: process.env.GITHUB_DISCOVERY_TOKEN });
 
 // License string → normalized type
 const LICENSE_MAP: Record<string, LicenseType> = {
