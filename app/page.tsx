@@ -76,12 +76,12 @@ export default function Home() {
         <div className="absolute bottom-0 left-1/3 w-[500px] h-[500px] rounded-full bg-cyan-600/6 blur-[100px] animate-pulse-slow" style={{ animationDelay: "3s" }} />
       </div>
 
-      {/* ── Nav ── */}
+      {/* ── Nav — fixed so it never scrolls away ── */}
       <motion.nav
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="sticky top-0 z-50 border-b border-white/5 backdrop-blur-xl bg-[#060610]/80 px-8 lg:px-16 py-4"
+        className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 backdrop-blur-xl bg-[#060610]/80 px-8 lg:px-16 py-4"
       >
         <div className="w-full flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
@@ -92,6 +92,7 @@ export default function Home() {
               beta
             </span>
           </Link>
+
           <div className="flex items-center gap-6 text-sm text-gray-400">
             <Link href="#features" className="hover:text-white transition-colors hidden md:block">Features</Link>
             <Link href="#pricing" className="hover:text-white transition-colors hidden md:block">Pricing</Link>
@@ -111,6 +112,9 @@ export default function Home() {
           </div>
         </div>
       </motion.nav>
+
+      {/* Spacer so fixed nav doesn't overlap content */}
+      <div className="h-[60px]" />
 
       {/* ── Hero ── */}
       <section ref={heroRef} className="relative min-h-[90vh] flex flex-col items-center justify-center px-6 pt-16 pb-24 z-10 overflow-hidden">

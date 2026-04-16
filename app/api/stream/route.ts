@@ -10,41 +10,20 @@ import {
 } from "@/lib/agents/assemble";
 import { packageAndDeliver } from "@/lib/agents/deliver";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { ProjectSpecSchema, BOMSchema } from "@/lib/validation/schemas";
 import type { ProjectSpec, BOM } from "@/types";
 
-export const maxDuration = 300; // 5 min timeout on Vercel Pro
+export const maxDuration = 300;
 export const dynamic = "force-dynamic";
 
 const StreamBodySchema = z.object({
   projectId: z.string().uuid(),
-  spec: z.object({
-    description: z.string().min(1).max(2000),
-    mcu: z.string().min(1).max(100),
-    rtos: z.string().optional(),
-    buildSystem: z.string().optional(),
-    components: z.array(z.object({
-      name: z.string().min(1).max(100),
-      interface: z.string().optional(),
-      partNumber: z.string().optional(),
-    })).optional(),
-    additionalContext: z.string().max(2000).optional(),
-  }),
-  bom: z.object({
-    items: z.array(z.object({
-      name: z.string().min(1).max(200),
-      partNumber: z.string().optional(),
-      quantity: z.number().int().positive().optional(),
-      estimatedPrice: z.number().nonnegative().optional(),
-      supplier: z.string().optional(),
-      notes: z.string().optional(),
-    })),
-    estimatedTotal: z.number().nonnegative().optional(),
-    notes: z.string().optional(),
-  }),
+  spec: ProjectSpecSchema,
+  bom: BOMSchema,
 });
 
 export async function POST(req: NextRequest) {
-  // Verify the user is authenticated before starting the pipeline
+  // ── Auth ────────────────────────────────────────────────────────────────────
   const supabaseAuth = await createClient();
   const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
   if (authError || !user) {
@@ -54,6 +33,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  // ── Input validation ────────────────────────────────────────────────────────
   const rawBody = await req.json().catch(() => null);
   if (!rawBody) {
     return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
@@ -64,16 +44,15 @@ export async function POST(req: NextRequest) {
 
   const parsed = StreamBodySchema.safeParse(rawBody);
   if (!parsed.success) {
-    return new Response(JSON.stringify({ error: "Invalid request body", details: parsed.error.flatten().fieldErrors }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: "Invalid request body", details: parsed.error.flatten().fieldErrors }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
   }
 
   const { projectId, spec, bom } = parsed.data as { projectId: string; spec: ProjectSpec; bom: BOM };
 
-  // Verify the projectId belongs to the authenticated user — prevents one user
-  // from hijacking another user's generation slot.
+  // ── Ownership check — prevent cross-user project hijacking ──────────────────
   const supabaseAdmin = createAdminClient();
   const { data: project, error: projectErr } = await supabaseAdmin
     .from("projects")
@@ -89,7 +68,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Set up SSE stream
+  // ── SSE stream ──────────────────────────────────────────────────────────────
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
@@ -103,17 +82,16 @@ export async function POST(req: NextRequest) {
       }
 
       try {
-        // ── Step 1: Discovery ────────────────────────────────────────────────
+        // ── Step 1: Discovery ──────────────────────────────────────────────────
         send("step", { step: "discover", status: "running" });
         progress("discover", "Starting open-source library search...");
 
         const candidates = await discoverLibraries(spec, (msg) =>
           progress("discover", msg)
         );
-
         send("step", { step: "discover", status: "done" });
 
-        // ── Step 2: Evaluation ───────────────────────────────────────────────
+        // ── Step 2: Evaluation ─────────────────────────────────────────────────
         send("step", { step: "evaluate", status: "running" });
         progress("evaluate", "Evaluating and scoring library candidates...");
 
@@ -128,47 +106,38 @@ export async function POST(req: NextRequest) {
         send("step", { step: "evaluate", status: "done" });
         send("libraries", { libraries: selected });
 
-        // ── Step 3: Assembly ─────────────────────────────────────────────────
+        // ── Step 3: Assembly ───────────────────────────────────────────────────
         send("step", { step: "assemble", status: "running" });
 
         const halFiles = await assembleHALLayer(spec, (msg) =>
           progress("assemble", msg)
         );
-
         const driverFiles = await assembleDriverLayer(spec, selected, (msg) =>
           progress("assemble", msg)
         );
-
         const appFiles = await assembleApplicationLayer(
-          spec,
-          [...halFiles, ...driverFiles],
-          (msg) => progress("assemble", msg)
+          spec, [...halFiles, ...driverFiles], (msg) => progress("assemble", msg)
         );
 
         const allFiles = [...halFiles, ...driverFiles, ...appFiles];
         progress("assemble", `✓ Generated ${allFiles.length} files`, "success");
         send("step", { step: "assemble", status: "done" });
 
-        // ── Step 4: README generation ────────────────────────────────────────
+        // ── Step 4: README ─────────────────────────────────────────────────────
         progress("deliver", "Generating README and attribution...");
         const readme = await generateReadme(spec, selected, allFiles);
 
-        // ── Step 5: Package & deliver ────────────────────────────────────────
+        // ── Step 5: Package & deliver ──────────────────────────────────────────
         send("step", { step: "deliver", status: "running" });
 
         const output = await packageAndDeliver(
-          projectId,
-          spec,
-          allFiles,
-          readme,
-          selected,
+          projectId, spec, allFiles, readme, selected,
           (msg) => progress("deliver", msg)
         );
 
         // Update Supabase record
         try {
-          const supabase = createAdminClient();
-          await supabase
+          await supabaseAdmin
             .from("projects")
             .update({
               status: "complete",
@@ -181,11 +150,7 @@ export async function POST(req: NextRequest) {
         }
 
         send("step", { step: "deliver", status: "done" });
-        send("complete", {
-          files: allFiles,
-          downloadUrl: output.downloadUrl,
-          readme,
-        });
+        send("complete", { files: allFiles, downloadUrl: output.downloadUrl, readme });
 
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Unknown error";
