@@ -3,7 +3,9 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
+import { Suspense } from "react";
 import { SignupForm } from "./SignupForm";
+import { AuthFormSkeleton } from "@/components/auth/AuthFormSkeleton";
 
 export default function SignupPage() {
   return (
@@ -81,7 +83,9 @@ export default function SignupPage() {
 
       {/* ── Right form panel ── */}
       <div className="flex-1 flex items-center justify-center px-6 py-16 relative z-10">
-        <SignupForm />
+        <Suspense fallback={<AuthFormSkeleton variant="signup" />}>
+          <SignupForm />
+        </Suspense>
       </div>
 
     </div>
