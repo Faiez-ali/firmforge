@@ -91,9 +91,11 @@ function IdeaCard({ idea }: { idea: Idea }) {
         {idea.sub}
       </div>
 
-      {/* Build hint on hover */}
-      <div className="absolute bottom-3.5 right-4 text-[10px] font-mono opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400">
-        Build this →
+      {/* Build hint on hover — top-right corner */}
+      <div className="absolute top-3 right-3.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
+        <span className="inline-flex items-center gap-1 text-[10px] font-semibold font-mono px-2 py-0.5 rounded-full bg-white/10 text-white border border-white/15 backdrop-blur-sm">
+          Build this →
+        </span>
       </div>
     </Link>
   );

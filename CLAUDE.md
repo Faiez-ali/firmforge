@@ -173,6 +173,19 @@ GITHUB_API_TOKEN
 
 Full static review of all source files. Issues ordered by severity.
 
+### CRITICAL — pending (session 6)
+
+**C5. `GITHUB_API_TOKEN` is ambiguous — must be split into two separate variables**
+- `lib/github/client.ts:4` uses `GITHUB_API_TOKEN` for library discovery search calls.
+- The `.env.local.example` comment says this token also handles "Pro user repo push" — but those are completely different use cases requiring different tokens.
+- Library discovery should use a **dedicated FirmForge bot GitHub account token** (not the founder's personal token).
+- Pro GitHub push should use the **logged-in user's OAuth token** (`profiles.github_access_token`) — already the correct DB design, just not yet wired up.
+- Fix:
+  1. Create a separate GitHub account (e.g. `firmforge-bot`) with only `public_repo` read scope
+  2. Rename `GITHUB_API_TOKEN` → `GITHUB_DISCOVERY_TOKEN` in `.env.local.example` and `lib/github/client.ts`
+  3. Update Vercel env vars to use the bot account token under the new name
+  4. Update `TODO-action-required.txt` accordingly
+
 ### CRITICAL — ✅ All fixed (session 5)
 
 **C1. ✅ Unprotected API routes** — auth guard added to `app/api/bom/route.ts` and `app/api/agents/hint/route.ts`.

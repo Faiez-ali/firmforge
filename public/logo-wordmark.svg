@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 178 40" fill="none" role="img" aria-label="FirmForge">
+  <title>FirmForge</title>
+
+  <!--
+    Mark: 40×40 (logo.svg geometry scaled ×0.5, drawn directly at half-coords)
+    Gap:  14px
+    Text: "FirmForge" — Inter 500, 21px, brand-500 #2b6aff, x=54, dominant-baseline=middle
+
+    Color tokens used (tailwind.config.ts):
+      brand-500  #2b6aff  → bars + wordmark text
+      brand-400  #5291ff  → nodes + trace
+      white      #ffffff  → halo (fill-opacity 0.15)
+
+    40×40 geometry (all values = logo.svg ÷ 2):
+      left margin x=4
+      bar heights: 2.5
+      bar y-tops:  5.5, 13, 20.5, 28    centers: 6.75, 14.25, 21.75, 29.25
+      bar widths:  27, 21, 15, 9
+      node x:      31, 25, 19, 13
+      halo r=3  node r=1.75
+  -->
+
+  <!-- ── Mark: bars (brand-500 #2b6aff) ── -->
+  <rect x="4"  y="5.5"  width="27" height="2.5" rx="1" fill="#2b6aff"/>
+  <rect x="4"  y="13"   width="21" height="2.5" rx="1" fill="#2b6aff"/>
+  <rect x="4"  y="20.5" width="15" height="2.5" rx="1" fill="#2b6aff"/>
+  <rect x="4"  y="28"   width="9"  height="2.5" rx="1" fill="#2b6aff"/>
+
+  <!-- ── Mark: diagonal trace (brand-400 #5291ff @ 0.35) ── -->
+  <polyline
+    points="31,6.75 25,14.25 19,21.75 13,29.25"
+    stroke="#5291ff"
+    stroke-width="0.75"
+    stroke-opacity="0.35"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- ── Mark: node halos ── -->
+  <circle cx="31" cy="6.75"  r="3" fill="#ffffff" fill-opacity="0.15"/>
+  <circle cx="25" cy="14.25" r="3" fill="#ffffff" fill-opacity="0.15"/>
+  <circle cx="19" cy="21.75" r="3" fill="#ffffff" fill-opacity="0.15"/>
+  <circle cx="13" cy="29.25" r="3" fill="#ffffff" fill-opacity="0.15"/>
+
+  <!-- ── Mark: node dots (brand-400 #5291ff) ── -->
+  <circle cx="31" cy="6.75"  r="1.75" fill="#5291ff"/>
+  <circle cx="25" cy="14.25" r="1.75" fill="#5291ff"/>
+  <circle cx="19" cy="21.75" r="1.75" fill="#5291ff"/>
+  <circle cx="13" cy="29.25" r="1.75" fill="#5291ff"/>
+
+  <!-- ── Wordmark: "FirmForge" — Inter 500, 21px, brand-500 #2b6aff ──
+       x=54 = 40 (mark) + 14 (gap)
+       dominant-baseline="middle" centres text on y=20 (half of 40px height)
+  -->
+  <text
+    x="54"
+    y="20"
+    dominant-baseline="middle"
+    font-family="Inter, system-ui, sans-serif"
+    font-weight="500"
+    font-size="21"
+    letter-spacing="-0.3"
+    fill="#2b6aff"
+  >FirmForge</text>
+</svg>

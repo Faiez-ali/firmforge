@@ -96,4 +96,19 @@
     font-family: var(--font-mono);
     @apply text-sm text-green-400;
   }
+
+  /* Skeleton shimmer sweep */
+  @keyframes shimmer {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
+
+  /* Slow aurora pulse used on landing */
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50%       { opacity: 1;   transform: scale(1.05); }
+  }
+  .animate-pulse-slow {
+    animation: pulse-slow 6s ease-in-out infinite;
+  }
 }

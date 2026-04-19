@@ -8,6 +8,7 @@ import CircuitBg from "@/components/hero/CircuitBg";
 import StepPlayer from "@/components/how-it-works/StepPlayer";
 import IdeaTicker from "@/components/hero/IdeaTicker";
 import HwSwAnim from "@/components/cta/HwSwAnim";
+import { LogoMark } from "@/components/ui/LogoMark";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -23,7 +24,7 @@ const PLANS = [
     name: "Free",
     price: "$0",
     per: "",
-    features: ["3 generations / month", "STM32 + ESP32", "Bare-metal only", "Zip download"],
+    features: ["3 generations / day", "STM32 + ESP32", "Bare-metal only", "Zip download"],
     missing: ["Compile validation", "RTOS support", "GitHub push"],
     cta: "Start free",
     highlight: false,
@@ -67,6 +68,16 @@ export default function Home() {
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
+  const { scrollY } = useScroll();
+  // Text slides leftward into the logo mark as user scrolls
+  const wordmarkOpacity = useTransform(scrollY, [0, 90], [1, 0]);
+  const wordmarkX = useTransform(scrollY, [0, 90], [0, -32]);
+  const wordmarkScale = useTransform(scrollY, [0, 90], [1, 0.6]);
+  const badgeOpacity = useTransform(scrollY, [0, 55], [1, 0]);
+  const badgeX = useTransform(scrollY, [0, 55], [0, -40]);
+  // Logo grows slightly as text collapses into it
+  const logoScale = useTransform(scrollY, [0, 90], [1, 1.25]);
+
   return (
     <main className="min-h-screen bg-[#060610] text-white overflow-x-hidden">
 
@@ -76,22 +87,32 @@ export default function Home() {
         <div className="absolute bottom-0 left-1/3 w-[500px] h-[500px] rounded-full bg-cyan-600/6 blur-[100px] animate-pulse-slow" style={{ animationDelay: "3s" }} />
       </div>
 
-      {/* ── Nav ── */}
+      {/* ── Nav — fixed so it never scrolls away ── */}
       <motion.nav
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="sticky top-0 z-50 border-b border-white/5 backdrop-blur-xl bg-[#060610]/80 px-8 lg:px-16 py-4"
+        className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 backdrop-blur-xl bg-[#060610]/80 px-8 lg:px-16 py-4"
       >
         <div className="w-full flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-lg font-bold tracking-tight">
+          <Link href="/" className="flex items-center gap-2 group overflow-hidden">
+            <motion.div style={{ scale: logoScale }} className="origin-center flex-shrink-0">
+              <LogoMark size={30} />
+            </motion.div>
+            <motion.span
+              style={{ opacity: wordmarkOpacity, x: wordmarkX, scale: wordmarkScale, transformOrigin: "left center" }}
+              className="text-lg font-bold tracking-tight whitespace-nowrap"
+            >
               Firm<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Forge</span>
-            </span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono">
+            </motion.span>
+            <motion.span
+              style={{ opacity: badgeOpacity, x: badgeX }}
+              className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono whitespace-nowrap flex-shrink-0"
+            >
               beta
-            </span>
+            </motion.span>
           </Link>
+
           <div className="flex items-center gap-6 text-sm text-gray-400">
             <Link href="#features" className="hover:text-white transition-colors hidden md:block">Features</Link>
             <Link href="#pricing" className="hover:text-white transition-colors hidden md:block">Pricing</Link>
@@ -111,6 +132,9 @@ export default function Home() {
           </div>
         </div>
       </motion.nav>
+
+      {/* Spacer so fixed nav doesn't overlap content */}
+      <div className="h-[60px]" />
 
       {/* ── Hero ── */}
       <section ref={heroRef} className="relative min-h-[90vh] flex flex-col items-center justify-center px-6 pt-16 pb-24 z-10 overflow-hidden">
