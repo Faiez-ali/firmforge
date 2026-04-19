@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { LoginForm } from "./LoginForm";
 import { AuthFormSkeleton } from "@/components/auth/AuthFormSkeleton";
+import { LogoMark } from "@/components/ui/LogoMark";
 
 export default function LoginPage() {
   return (
@@ -41,6 +42,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 mb-14">
+          <LogoMark size={28} />
           <span className="text-2xl font-bold tracking-tight">
             Firm<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Forge</span>
           </span>

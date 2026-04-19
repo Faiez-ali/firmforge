@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { SidebarNav } from "@/components/dashboard/SidebarNav";
+import { LogoMark } from "@/components/ui/LogoMark";
 
 export default async function DashboardLayout({
   children,
@@ -28,6 +29,7 @@ export default async function DashboardLayout({
       <aside className="w-56 border-r border-white/5 flex flex-col py-5 px-3 flex-shrink-0 bg-[#07080f]">
         {/* Logo */}
         <Link href="/" className="px-3 mb-7 flex items-center gap-1.5">
+          <LogoMark size={18} />
           <span className="text-base font-bold tracking-tight">
             Firm<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Forge</span>
           </span>

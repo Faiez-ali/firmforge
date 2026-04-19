@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="none" role="img" aria-label="FirmForge logo mark (dark background)">
+  <title>FirmForge</title>
+
+  <!--
+    Same geometry as logo.svg, shifted one stop lighter so the mark reads
+    clearly against the app's dark background (#060610 / dark --background
+    hsl(222 47% 6%)).
+
+    Color tokens (tailwind.config.ts):
+      brand-400  #5291ff  → bars   (one stop lighter than brand-500 for dark bg)
+      brand-300  #8ab8ff  → nodes + trace (nearest token to dark --foreground)
+      white      #ffffff  → halo (fill-opacity 0.12, reduced on dark surface)
+  -->
+
+  <!-- ── Bars (brand-400 #5291ff) ── -->
+  <rect x="8"  y="11" width="54" height="5" rx="2" fill="#5291ff"/>
+  <rect x="8"  y="26" width="42" height="5" rx="2" fill="#5291ff"/>
+  <rect x="8"  y="41" width="30" height="5" rx="2" fill="#5291ff"/>
+  <rect x="8"  y="56" width="18" height="5" rx="2" fill="#5291ff"/>
+
+  <!-- ── Diagonal trace (brand-300 #8ab8ff @ 0.35) ── -->
+  <polyline
+    points="62,13.5 50,28.5 38,43.5 26,58.5"
+    stroke="#8ab8ff"
+    stroke-width="1"
+    stroke-opacity="0.35"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- ── Node halos (white disk, softer on dark surface) ── -->
+  <circle cx="62" cy="13.5" r="6"  fill="#ffffff" fill-opacity="0.12"/>
+  <circle cx="50" cy="28.5" r="6"  fill="#ffffff" fill-opacity="0.12"/>
+  <circle cx="38" cy="43.5" r="6"  fill="#ffffff" fill-opacity="0.12"/>
+  <circle cx="26" cy="58.5" r="6"  fill="#ffffff" fill-opacity="0.12"/>
+
+  <!-- ── Node dots (brand-300 #8ab8ff) ── -->
+  <circle cx="62" cy="13.5" r="3.5" fill="#8ab8ff"/>
+  <circle cx="50" cy="28.5" r="3.5" fill="#8ab8ff"/>
+  <circle cx="38" cy="43.5" r="3.5" fill="#8ab8ff"/>
+  <circle cx="26" cy="58.5" r="3.5" fill="#8ab8ff"/>
+</svg>

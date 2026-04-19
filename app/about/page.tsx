@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { LogoMark } from "@/components/ui/LogoMark";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -127,6 +128,7 @@ export default function AboutPage() {
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
+            <LogoMark size={22} />
             <span className="text-lg font-bold tracking-tight">
               Firm<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Forge</span>
             </span>

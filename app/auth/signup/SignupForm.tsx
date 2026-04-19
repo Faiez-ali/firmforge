@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { LogoMark } from "@/components/ui/LogoMark";
 
 const container = {
   hidden: {},
@@ -127,7 +128,8 @@ export function SignupForm() {
     >
       {/* Header */}
       <motion.div variants={item} className="text-center mb-8">
-        <Link href="/" className="text-xl font-semibold tracking-tight lg:hidden">
+        <Link href="/" className="inline-flex items-center gap-2 text-xl font-semibold tracking-tight lg:hidden">
+          <LogoMark size={22} />
           Firm<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Forge</span>
         </Link>
         <p className="text-gray-400 text-sm mt-2">Create your free account</p>

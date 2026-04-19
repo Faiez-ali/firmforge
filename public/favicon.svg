@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" role="img" aria-label="FirmForge favicon">
+  <title>FirmForge</title>
+
+  <!--
+    Simplified mark — bars only, no nodes or trace, optimised for 16×16.
+    Proportions derived from the 80×80 mark (widths scaled to 16px grid).
+
+    Color token (tailwind.config.ts):
+      brand-500  #2b6aff  → all bars
+
+    Layout (4 bars, height=2, gap=2, top-pad=1):
+      bar 1: x=1.5  y=1   width=13
+      bar 2: x=1.5  y=5   width=10
+      bar 3: x=1.5  y=9   width=7
+      bar 4: x=1.5  y=13  width=4
+  -->
+
+  <rect x="1.5" y="1"  width="13" height="2" rx="0.5" fill="#2b6aff"/>
+  <rect x="1.5" y="5"  width="10" height="2" rx="0.5" fill="#2b6aff"/>
+  <rect x="1.5" y="9"  width="7"  height="2" rx="0.5" fill="#2b6aff"/>
+  <rect x="1.5" y="13" width="4"  height="2" rx="0.5" fill="#2b6aff"/>
+</svg>
