@@ -18,6 +18,11 @@ export default async function DashboardPage() {
     .order("created_at", { ascending: false })
     .limit(5);
 
+  const { count: totalProjects } = await supabase
+    .from("projects")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", user!.id);
+
   const plan = profile?.plan ?? "free";
   const usedThisMonth = profile?.generations_this_month ?? 0;
   const limit = plan === "free" ? 3 : -1;
@@ -46,7 +51,7 @@ export default async function DashboardPage() {
         />
         <StatCard
           label="Total projects"
-          value={String(recentProjects?.length ?? 0)}
+          value={String(totalProjects ?? 0)}
           sub="all time"
         />
         <StatCard

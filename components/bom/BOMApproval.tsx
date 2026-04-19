@@ -7,9 +7,10 @@ interface Props {
   spec: ProjectSpec;
   onApprove: () => void;
   onBack: () => void;
+  loading?: boolean;
 }
 
-export default function BOMApproval({ bom, spec, onApprove, onBack }: Props) {
+export default function BOMApproval({ bom, spec, onApprove, onBack, loading = false }: Props) {
   return (
     <div className="max-w-3xl mx-auto animate-fade-in">
       <div className="mb-8">
@@ -69,7 +70,7 @@ export default function BOMApproval({ bom, spec, onApprove, onBack }: Props) {
       )}
 
       {/* Project summary */}
-      <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 mb-8">
+      <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 mb-6">
         <div className="text-xs text-gray-500 font-mono mb-3">PROJECT SUMMARY</div>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="flex justify-between">
@@ -91,20 +92,46 @@ export default function BOMApproval({ bom, spec, onApprove, onBack }: Props) {
         </div>
       </div>
 
+      {/* What happens next */}
+      <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/15 mb-8 text-sm text-gray-400">
+        <span className="text-blue-400 font-mono text-xs block mb-1">NEXT STEPS</span>
+        FirmForge will generate a wiring schematic, then run 4 AI agents to discover open-source
+        drivers, evaluate them, assemble your layered codebase, and deliver a zip — typically in
+        45–90 seconds.
+      </div>
+
       <div className="flex gap-3">
         <button
           onClick={onBack}
-          className="px-6 py-3 rounded-xl border border-white/10 text-gray-400 hover:text-white text-sm transition-colors"
+          disabled={loading}
+          className="px-6 py-3 rounded-xl border border-white/10 text-gray-400 hover:text-white text-sm transition-colors disabled:opacity-40"
         >
           ← Edit project
         </button>
         <button
           onClick={onApprove}
-          className="flex-1 py-3 rounded-xl bg-brand-500 hover:bg-brand-400 text-white font-semibold text-sm transition-all hover:scale-[1.01]"
+          disabled={loading}
+          className="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm transition-all hover:scale-[1.01] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
         >
-          ✓ Approve BOM & start generation
+          {loading ? (
+            <>
+              <Spinner />
+              Starting generation…
+            </>
+          ) : (
+            "✓ Approve BOM & start generation"
+          )}
         </button>
       </div>
     </div>
+  );
+}
+
+function Spinner() {
+  return (
+    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+    </svg>
   );
 }

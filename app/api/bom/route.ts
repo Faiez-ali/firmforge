@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 import { generateBOM } from "@/lib/agents/intake";
+import { generateSchematic } from "@/lib/agents/schematic";
 import { createClient } from "@/lib/supabase/server";
 import type { ProjectSpec } from "@/types";
 
@@ -20,11 +21,12 @@ export async function POST(req: NextRequest) {
     }
 
     const bom = await generateBOM(spec);
-
-    // Try to enrich with live prices — gracefully falls back if APIs unavailable
     const enrichedBOM = await enrichWithLivePrices(bom);
 
-    return NextResponse.json({ bom: enrichedBOM });
+    // Generate wiring schematic netlist alongside BOM — same Haiku call budget
+    const schematic = await generateSchematic(spec, enrichedBOM).catch(() => null);
+
+    return NextResponse.json({ bom: enrichedBOM, schematic });
   } catch (err) {
     console.error("BOM generation error:", err);
     return NextResponse.json({ error: "Failed to generate BOM" }, { status: 500 });
