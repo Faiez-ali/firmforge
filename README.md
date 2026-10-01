@@ -7,6 +7,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://typescriptlang.org)
 
 ---
+> [!NOTE]
+> Actively looking for contributors !!!!
+
 
 ## What it does
 
